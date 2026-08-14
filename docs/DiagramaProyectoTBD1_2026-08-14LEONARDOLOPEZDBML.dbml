@@ -1,0 +1,173 @@
+enum estado__t {
+
+}
+
+enum tipo__t {
+
+}
+
+enum metodo_pago__t {
+
+}
+
+Table usuarios [headercolor: #175e7a] {
+	usuario_dni varchar(18) [ pk, not null ]
+	primer_nombre varchar(20)
+	segundo_nombre varchar(20)
+	primer_apellido varchar(20)
+	segundo_apellido varchar(20)
+	email varchar(50)
+	fecha_registro datetime
+	salario decimal(8,2)
+	estado boolean
+	creado_por varchar(100)
+	creado_en datetime
+	modificado_por varchar(100)
+	modificado_en datetime
+}
+
+Table presupuestos [headercolor: #175e7a] {
+	id_presupuesto integer [ pk, increment, not null ]
+	usuario_dni varchar(18)
+	nombre varchar(40)
+	descripcion varchar(200)
+	anio_inicio mediumint
+	mes_inicio tinyint
+	anio_fin mediumint
+	mes_fin tinyint
+	total_ingresos decimal(8,2)
+	total_gastos decimal(8,2)
+	total_ahorro decimal(8,2)
+	fecha_creacion datetime
+	estado estado__t
+	creado_por varchar(100)
+	creado_en datetime
+	modificado_por varchar(100)
+	modificado_en datetime
+}
+
+Table categorias [headercolor: #175e7a] {
+	id_categoria integer [ pk, increment, not null ]
+	nombre varchar(50)
+	descripcion varchar(250)
+	tipo tipo__t
+	icono_nombre varchar(250)
+	color_hex varchar(50)
+	orden integer
+	creado_por varchar(100)
+	creado_en datetime
+	modificado_por varchar(100)
+	modificado_en datetime
+}
+
+Table subcategorias [headercolor: #175e7a] {
+	id_subcategoria integer [ pk, increment, not null ]
+	id_categoria integer
+	nombre varchar(50)
+	descripcion varchar(255)
+	estado boolean
+	por_defecto boolean
+	creado_por varchar(100)
+	creado_en datetime
+	modificado_por varchar(100)
+	modificado_en datetime
+}
+
+Table presupuestos_detalles [headercolor: #175e7a] {
+	id_pdetalle integer [ pk, increment, not null ]
+	id_presupuesto integer
+	id_subcategoria integer
+	monto_asignado decimal(8,2)
+	justificacion_monto varchar(255)
+	creado_por varchar(100)
+	creado_en datetime
+	modificado_por varchar(100)
+	modificado_en datetime
+}
+
+Table obligaciones_fijas [headercolor: #175e7a] {
+	id_obligacion integer [ pk, increment, not null ]
+	usuario_dni varchar(18)
+	id_subcategoria integer
+	nombre varchar(50)
+	descripcion varchar(255)
+	monto_fijo decimal(8,2)
+	vence_dia tinyint
+	vigente boolean
+	fecha_inicio date
+	fecha_final date
+	creado_por varchar(100)
+	creado_en datetime
+	modificado_por varchar(100)
+	modificado_en datetime
+}
+
+Table transacciones [headercolor: #175e7a] {
+	id_transaccion integer [ pk, increment, not null ]
+	usuario_dni varchar(18)
+	id_presupuesto integer
+	anio mediumint
+	mes tinyint
+	id_subcategoria integer
+	tipo varchar(50)
+	descripcion varchar(255)
+	monto decimal(8,2)
+	fecha_ocurrido datetime
+	metodo_pago metodo_pago__t
+	num_factura varchar(20)
+	observaciones varchar(255)
+	fecha_registro datetime
+	creado_por varchar(100)
+	creado_en datetime
+	modificado_por varchar(100)
+	modificado_en datetime
+}
+
+Table obligaciones_transaccion [headercolor: #175e7a] {
+	id_transaccion integer [ pk, not null ]
+	id_obligacion integer [ pk, not null ]
+}
+
+Ref fk_presupuestos_usuario_dni_usuarios {
+	presupuestos.usuario_dni > usuarios.usuario_dni [ delete: no action, update: no action ]
+}
+
+Ref fk_obligaciones_fijas_usuario_dni_usuarios {
+	obligaciones_fijas.usuario_dni > usuarios.usuario_dni [ delete: no action, update: no action ]
+}
+
+Ref fk_transacciones_usuario_dni_usuarios {
+	transacciones.usuario_dni > usuarios.usuario_dni [ delete: no action, update: no action ]
+}
+
+Ref fk_subcategorias_id_categoria_categorias {
+	subcategorias.id_categoria > categorias.id_categoria [ delete: no action, update: no action ]
+}
+
+Ref fk_presupuestos_detalles_id_subcategoria_subcategorias {
+	presupuestos_detalles.id_subcategoria > subcategorias.id_subcategoria [ delete: no action, update: no action ]
+}
+
+Ref fk_obligaciones_fijas_id_subcategoria_subcategorias {
+	obligaciones_fijas.id_subcategoria > subcategorias.id_subcategoria [ delete: no action, update: no action ]
+}
+
+Ref fk_transacciones_id_subcategoria_subcategorias {
+	transacciones.id_subcategoria > subcategorias.id_subcategoria [ delete: no action, update: no action ]
+}
+
+Ref fk_presupuestos_detalles_id_presupuesto_presupuestos {
+	presupuestos_detalles.id_presupuesto > presupuestos.id_presupuesto [ delete: no action, update: no action ]
+}
+
+Ref fk_transacciones_id_presupuesto_presupuestos {
+	transacciones.id_presupuesto > presupuestos.id_presupuesto [ delete: no action, update: no action ]
+}
+
+Ref fk_obligaciones_transaccion_id_transaccion_transacciones {
+	obligaciones_transaccion.id_transaccion - transacciones.id_transaccion [ delete: no action, update: no action ]
+}
+
+Ref fk_obligaciones_transaccion_id_obligacion_obligaciones_fijas {
+	obligaciones_transaccion.id_obligacion < obligaciones_fijas.id_obligacion [ delete: no action, update: no action ]
+}
