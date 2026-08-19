@@ -1,131 +1,142 @@
 enum estado__t {
-
+	activo
+	cerrado
+	borrador
 }
 
 enum tipo__t {
-
+	ingreso
+	gasto
+	ahorro
 }
 
 enum metodo_pago__t {
-
+	efectivo
+	tarjeta_debito
+	tarjeta_credito
+	transferencia
 }
 
 Table usuarios [headercolor: #175e7a] {
 	usuario_dni varchar(18) [ pk, not null ]
-	primer_nombre varchar(20)
+	primer_nombre varchar(20) [ not null ]
 	segundo_nombre varchar(20)
-	primer_apellido varchar(20)
+	primer_apellido varchar(20) [ not null ]
 	segundo_apellido varchar(20)
-	email varchar(50)
-	fecha_registro datetime
-	salario decimal(8,2)
-	estado boolean
-	creado_por varchar(100)
-	creado_en datetime
+	email varchar(50) [ not null, unique ]
+	fecha_registro datetime [ default: CURRENT_TIMESTAMP ]
+	salario decimal(8,2) [ not null ]
+	estado boolean [ default: true ]
+	creado_por varchar(100) [ not null ]
+	creado_en datetime [ default: CURRENT_TIMESTAMP ]
 	modificado_por varchar(100)
-	modificado_en datetime
+	modificado_en datetime [ default: CURRENT_TIMESTAMP ]
 }
 
 Table presupuestos [headercolor: #175e7a] {
 	id_presupuesto integer [ pk, increment, not null ]
-	usuario_dni varchar(18)
-	nombre varchar(40)
+	usuario_dni varchar(18) [ not null ]
+	nombre varchar(40) [ not null ]
 	descripcion varchar(200)
-	anio_inicio mediumint
-	mes_inicio tinyint
-	anio_fin mediumint
-	mes_fin tinyint
-	total_ingresos decimal(8,2)
-	total_gastos decimal(8,2)
-	total_ahorro decimal(8,2)
-	fecha_creacion datetime
-	estado estado__t
-	creado_por varchar(100)
-	creado_en datetime
+	anio_inicio mediumint [ not null ]
+	mes_inicio tinyint [ not null ]
+	anio_fin mediumint [ not null ]
+	mes_fin tinyint [ not null ]
+	total_ingresos decimal(8,2) [ not null, default: 0 ]
+	total_gastos decimal(8,2) [ not null, default: 0 ]
+	total_ahorro decimal(8,2) [ not null, default: 0 ]
+	fecha_creacion datetime [ default: CURRENT_TIMESTAMP ]
+	estado estado__t [ not null, default: borrador ]
+	creado_por varchar(100) [ not null ]
+	creado_en datetime [ default: CURRENT_TIMESTAMP ]
 	modificado_por varchar(100)
-	modificado_en datetime
+	modificado_en datetime [ default: CURRENT_TIMESTAMP ]
 }
 
 Table categorias [headercolor: #175e7a] {
 	id_categoria integer [ pk, increment, not null ]
-	nombre varchar(50)
+	nombre varchar(50) [ not null ]
 	descripcion varchar(250)
-	tipo tipo__t
+	tipo tipo__t [ not null ]
 	icono_nombre varchar(250)
 	color_hex varchar(50)
 	orden integer
-	creado_por varchar(100)
-	creado_en datetime
+	creado_por varchar(100) [ not null ]
+	creado_en datetime [ default: CURRENT_TIMESTAMP ]
 	modificado_por varchar(100)
-	modificado_en datetime
+	modificado_en datetime [ default: CURRENT_TIMESTAMP ]
 }
 
 Table subcategorias [headercolor: #175e7a] {
 	id_subcategoria integer [ pk, increment, not null ]
-	id_categoria integer
-	nombre varchar(50)
+	id_categoria integer [ not null ]
+	nombre varchar(50) [ not null ]
 	descripcion varchar(255)
-	estado boolean
-	por_defecto boolean
-	creado_por varchar(100)
-	creado_en datetime
+	estado boolean [ default: true ]
+	por_defecto boolean [ default: false ]
+	creado_por varchar(100) [ not null ]
+	creado_en datetime [ default: CURRENT_TIMESTAMP ]
 	modificado_por varchar(100)
-	modificado_en datetime
+	modificado_en datetime [ default: CURRENT_TIMESTAMP ]
 }
 
 Table presupuestos_detalles [headercolor: #175e7a] {
 	id_pdetalle integer [ pk, increment, not null ]
-	id_presupuesto integer
-	id_subcategoria integer
-	monto_asignado decimal(8,2)
+	id_presupuesto integer [ not null ]
+	id_subcategoria integer [ not null ]
+	monto_asignado decimal(8,2) [ not null ]
 	justificacion_monto varchar(255)
-	creado_por varchar(100)
-	creado_en datetime
+	creado_por varchar(100) [ not null ]
+	creado_en datetime [ default: CURRENT_TIMESTAMP ]
 	modificado_por varchar(100)
-	modificado_en datetime
+	modificado_en datetime [ default: CURRENT_TIMESTAMP ]
 }
 
 Table obligaciones_fijas [headercolor: #175e7a] {
 	id_obligacion integer [ pk, increment, not null ]
-	usuario_dni varchar(18)
-	id_subcategoria integer
-	nombre varchar(50)
+	usuario_dni varchar(18) [ not null ]
+	id_subcategoria integer [ not null ]
+	nombre varchar(50) [ not null ]
 	descripcion varchar(255)
-	monto_fijo decimal(8,2)
-	vence_dia tinyint
-	vigente boolean
-	fecha_inicio date
+	monto_fijo decimal(8,2) [ not null ]
+	vence_dia tinyint [ not null ]
+	vigente boolean [ default: true ]
+	fecha_inicio date [ not null ]
 	fecha_final date
-	creado_por varchar(100)
-	creado_en datetime
+	creado_por varchar(100) [ not null ]
+	creado_en datetime [ default: CURRENT_TIMESTAMP ]
 	modificado_por varchar(100)
-	modificado_en datetime
+	modificado_en datetime [ default: CURRENT_TIMESTAMP ]
 }
 
 Table transacciones [headercolor: #175e7a] {
 	id_transaccion integer [ pk, increment, not null ]
-	usuario_dni varchar(18)
-	id_presupuesto integer
-	anio mediumint
-	mes tinyint
-	id_subcategoria integer
-	tipo varchar(50)
+	usuario_dni varchar(18) [ not null ]
+	id_presupuesto integer [ not null ]
+	anio mediumint [ not null ]
+	mes tinyint [ not null ]
+	id_subcategoria integer [ not null ]
+	tipo tipo__t [ not null ]
 	descripcion varchar(255)
-	monto decimal(8,2)
-	fecha_ocurrido datetime
-	metodo_pago metodo_pago__t
+	monto decimal(8,2) [ not null ]
+	fecha_ocurrido datetime [ not null ]
+	metodo_pago metodo_pago__t [ not null ]
 	num_factura varchar(20)
 	observaciones varchar(255)
-	fecha_registro datetime
-	creado_por varchar(100)
-	creado_en datetime
+	fecha_registro datetime [ default: CURRENT_TIMESTAMP ]
+	creado_por varchar(100) [ not null ]
+	creado_en datetime [ default: CURRENT_TIMESTAMP ]
 	modificado_por varchar(100)
-	modificado_en datetime
+	modificado_en datetime [ default: CURRENT_TIMESTAMP ]
 }
 
 Table obligaciones_transaccion [headercolor: #175e7a] {
-	id_transaccion integer [ pk, not null ]
-	id_obligacion integer [ pk, not null ]
+	id_transaccion integer [ not null ]
+	id_obligacion integer [ not null ]
+
+	indexes {
+		(id_transaccion, id_obligacion)
+	}
 }
 
 Ref fk_presupuestos_usuario_dni_usuarios {
