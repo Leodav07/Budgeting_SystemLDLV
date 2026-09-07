@@ -16,19 +16,19 @@ CREATE PROCEDURE sp_insertar_obligacion(IN p_usuario_dni VARCHAR(18),
 
 BEGIN 
 	IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE id_subcategoria = p_id_subcategoria AND estado = true) THEN
-		SIGNAL SQLSTATE '40009' SET MESSAGE_TEXT = 'La categoria no existe o no esta activa.';
+		SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = 'La categoria no existe o no esta activa.';
 	END IF;
     
 	IF p_fecha_final IS NOT NULL THEN
 		IF p_fecha_final < p_fecha_inicio THEN
-			SIGNAL SQLSTATE '40010' SET MESSAGE_TEXT = 'La fecha final debe ser mayor que la fecha inicial.';
+			SIGNAL SQLSTATE '45010' SET MESSAGE_TEXT = 'La fecha final debe ser mayor que la fecha inicial.';
 		END IF;
 	END IF;
     
-    IF NOT (SELECT 1 FROM subcategorias s
+    IF NOT EXISTS (SELECT 1 FROM subcategorias s
 		INNER JOIN categorias c ON s.id_categoria = c.id_categoria
         WHERE s.id_subcategoria = p_id_subcategoria AND c.tipo = 'gasto') THEN
-		SIGNAL SQLSTATE '40011' SET MESSAGE_TEXT = 'La subcategoria debe pertenecer al tipo GASTO dentro de categoria.';
+		SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = 'La subcategoria debe pertenecer al tipo GASTO dentro de categoria.';
 	END IF;
     
     INSERT INTO obligaciones_fijas (usuario_dni, id_subcategoria, nombre, descripcion, monto_fijo,
@@ -48,6 +48,7 @@ DROP PROCEDURE IF EXISTS sp_actualizar_obligacion;
 DELIMITER $$
 
 CREATE PROCEDURE sp_actualizar_obligacion(IN p_id_obligacion INT,
+										IN p_id_subcategoria INT,
                                         IN p_nombre VARCHAR(50),
                                         IN p_descripcion VARCHAR(255),
                                         IN p_monto_fijo DECIMAL (8,2),
@@ -58,19 +59,19 @@ CREATE PROCEDURE sp_actualizar_obligacion(IN p_id_obligacion INT,
 
 BEGIN 
 IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE id_subcategoria = p_id_subcategoria AND estado = true) THEN
-		SIGNAL SQLSTATE '40009' SET MESSAGE_TEXT = 'La categoria no existe o no esta activa.';
+		SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = 'La categoria no existe o no esta activa.';
 	END IF;
     
 	IF p_fecha_final IS NOT NULL THEN
 		IF p_fecha_final < p_fecha_inicio THEN
-			SIGNAL SQLSTATE '40010' SET MESSAGE_TEXT = 'La fecha final debe ser mayor que la fecha inicial.';
+			SIGNAL SQLSTATE '45010' SET MESSAGE_TEXT = 'La fecha final debe ser mayor que la fecha inicial.';
 		END IF;
 	END IF;
     
-    IF NOT (SELECT 1 FROM subcategorias s
+    IF NOT EXISTS (SELECT 1 FROM subcategorias s
 		INNER JOIN categorias c ON s.id_categoria = c.id_categoria
         WHERE s.id_subcategoria = p_id_subcategoria AND c.tipo = 'gasto') THEN
-		SIGNAL SQLSTATE '40011' SET MESSAGE_TEXT = 'La subcategoria debe pertenecer al tipo GASTO dentro de categoria.';
+		SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = 'La subcategoria debe pertenecer al tipo GASTO dentro de categoria.';
 	END IF;
     
     UPDATE obligaciones_fijas
@@ -89,10 +90,11 @@ DROP PROCEDURE IF EXISTS sp_eliminar_obligacion;
 
 DELIMITER $$
 
-CREATE PROCEDURE sp_eliminar_obligacion(IN p_id_obligacion INT)
+CREATE PROCEDURE sp_eliminar_obligacion(IN p_id_obligacion INT,
+										IN p_modificado_por VARCHAR(100))
 BEGIN
 	UPDATE obligaciones_fijas
-    SET vigente = false
+    SET vigente = false, modificado_por = p_modificado_por
     WHERE id_obligacion = p_id_obligacion;
 END $$
 
@@ -123,7 +125,7 @@ DROP PROCEDURE IF EXISTS sp_listar_obligaciones_usuario;
 
 DELIMITER $$
 
-CREATE PROCEDURE sp_listar_obligaciones_usuario(IN p_usuario_dni INT,
+CREATE PROCEDURE sp_listar_obligaciones_usuario(IN p_usuario_dni VARCHAR(18),
 												IN p_vigente BOOLEAN)
 BEGIN 
 	SELECT o.usuario_dni, o.id_subcategoria, o.nombre AS nombre_obligacion, o.descripcion AS descripcion_obligacion,
