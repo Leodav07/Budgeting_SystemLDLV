@@ -1,4 +1,4 @@
-package org.example;
+package org.example.config;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -17,7 +17,6 @@ public class DBConnection {
             System.out.println("Connected to database");
             return conn;
         } catch (SQLException ex) {
-            // handle any errors
             System.out.println("SQLException: " + ex.getMessage());
             System.out.println("SQLState: " + ex.getSQLState());
             System.out.println("VendorError: " + ex.getErrorCode());
