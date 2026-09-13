@@ -1,4 +1,6 @@
 package org.example.dto.usuario;
 
-public class EliminarUsuarioRequest {
+public record EliminarUsuarioRequest (
+        String p_modificado_por
+){
 }

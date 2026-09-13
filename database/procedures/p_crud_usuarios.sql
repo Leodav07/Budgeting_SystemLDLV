@@ -67,6 +67,15 @@ DELIMITER $$
 CREATE PROCEDURE sp_eliminar_usuario(IN dni VARCHAR(18),
 									IN p_modificado_por VARCHAR(100))
 BEGIN 
+	IF NOT EXISTS (
+    SELECT 1
+    FROM usuarios
+    WHERE usuario_dni = dni
+	) THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'USUARIO_NO_EXISTE';
+	END IF;
+    
 	UPDATE usuarios
 	SET estado = false, modificado_por = p_modificado_por
 	WHERE usuario_dni = dni;
@@ -82,15 +91,27 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_consultar_usuario(IN dni VARCHAR(18))
 
+    
 BEGIN
+
+	IF NOT EXISTS (
+    SELECT 1
+    FROM usuarios
+    WHERE usuario_dni = dni
+	) THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'USUARIO_NO_EXISTE';
+	END IF;
+    
 	SELECT usuario_dni, 
-			CONCAT_WS(' ', primer_nombre, segundo_nombre, primer_apellido, segundo_apellido) AS nombre_completo, 
+			primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, 
             email, fecha_registro, salario, estado
     FROM usuarios
     WHERE usuario_dni = dni;
 END $$
 
 DELIMITER ;
+
 
 -- 5. Listar usuarios 
 
@@ -100,8 +121,9 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_listar_usuarios()
 BEGIN
+    
 	SELECT usuario_dni,
-		CONCAT_WS(' ', primer_nombre, segundo_nombre, primer_apellido, segundo_apellido) AS nombre_completo,
+		primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, email, fecha_registro, salario,
         estado
 	FROM usuarios;
 END $$
