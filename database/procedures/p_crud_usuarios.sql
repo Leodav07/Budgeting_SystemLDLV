@@ -1,5 +1,5 @@
 -- 1. sp crear usuario
-
+SELECT * FROM usuarios;
 DROP PROCEDURE IF EXISTS sp_insertar_usuario;
 
 DELIMITER $$
@@ -13,6 +13,10 @@ CREATE PROCEDURE sp_insertar_usuario(IN dni VARCHAR(18),
                                     IN psalario DECIMAL(8,2),
 									IN pcreado_por VARCHAR(100))
 BEGIN
+	IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
+	END IF;
+    
 	INSERT INTO usuarios (usuario_dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
 						  email, salario, creado_por)
     VALUES (dni, p_nombre, s_nombre, p_apellido, s_apellido, correo_elec, psalario, pcreado_por);
@@ -35,6 +39,15 @@ CREATE PROCEDURE sp_actualizar_usuario(IN dni VARCHAR(18),
                                     IN psalario DECIMAL(8,2),
 									IN p_modificado_por VARCHAR(100))
 BEGIN
+	IF NOT EXISTS (
+    SELECT 1
+    FROM usuarios
+    WHERE usuario_dni = dni
+	) THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'USUARIO_NO_EXISTE';
+	END IF;
+
 	UPDATE usuarios
     SET	primer_nombre = p_nombre, segundo_nombre = s_nombre, 
 		primer_apellido = p_apellido, segundo_apellido = s_apellido, 

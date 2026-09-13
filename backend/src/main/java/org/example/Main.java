@@ -3,6 +3,7 @@ package org.example;
 import io.javalin.Javalin;
 import org.example.config.DBConnection;
 import org.example.controller.UsuarioController;
+import org.example.exception.ApiExceptionController;
 import routes.UsuarioRoutes;
 
 import java.sql.SQLException;
@@ -15,13 +16,13 @@ public class Main {
         Javalin app = Javalin.create();
         UsuarioRoutes.registrar(app);
 
-        app.exception(SQLException.class, (error, ctx) -> {
-            ctx.status(500).json(Map.of(
-                    "mensaje", "Ocurrio un error al insertar usuario."
+        app.exception(ApiExceptionController.class, (err, ctx) ->{
+                ctx.status(err.getStatus()).json(Map.of(
+                        "codigo", err.getCodigo(),
+                        "mensaje", err.getMessage()
+                ));
+    });
 
-            ));
-            error.printStackTrace();
-        });
 
         app.start(7070);
 

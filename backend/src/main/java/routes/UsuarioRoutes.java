@@ -9,5 +9,6 @@ public class UsuarioRoutes {
         UsuarioController userController = new UsuarioController();
 
         app.post("/api/usuarios", userController::insertarUsuario);
+        app.put("/api/usuarios/{id}", userController::actualizarUsuario);
     }
 }
