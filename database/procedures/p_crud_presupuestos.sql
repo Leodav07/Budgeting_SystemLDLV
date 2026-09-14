@@ -18,19 +18,19 @@ CREATE PROCEDURE sp_insertar_presupuesto(IN p_usuario_dni VARCHAR(18),
 
 BEGIN 
 	IF p_anio_inicio > p_anio_final THEN
-		SIGNAL SQLSTATE '45004' SET MESSAGE_TEXT = 'El año final no puede ser menor que el año de inicio.';
+		SIGNAL SQLSTATE '45004' SET MESSAGE_TEXT = 'ANIO_FINAL_MENOR';
 	END IF;
     
     IF p_anio_inicio = p_anio_final THEN
 		IF p_mes_inicio > p_mes_final THEN
-			SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = 'El mes final no puede ser menor que el mes de inicio.';
+			SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = 'MES_FINAL_MENOR';
 		END IF;
 	END IF;
     
     IF EXISTS (SELECT 1 FROM presupuestos WHERE usuario_dni = p_usuario_dni AND estado = 'activo'
 					AND (anio_inicio * 100 + mes_inicio) <= (p_anio_final * 100 + p_mes_final) 
                     AND (anio_fin * 100 + mes_fin) >= (p_anio_inicio * 100 + p_mes_inicio)) THEN
-                    SIGNAL SQLSTATE '45006' SET MESSAGE_TEXT = 'No se puede crear presupuesto ya que se traslapa con otro presupuesto activo.';
+                    SIGNAL SQLSTATE '45006' SET MESSAGE_TEXT = 'TRASLAPACION';
 			END IF;
             
 	INSERT INTO presupuestos (usuario_dni, nombre, descripcion, anio_inicio, mes_inicio, anio_fin, mes_fin,
@@ -63,21 +63,25 @@ CREATE PROCEDURE sp_actualizar_presupuesto(IN p_usuario_dni VARCHAR(18),
 										 IN p_modificado_por VARCHAR(100))
 
 BEGIN 
+
+IF NOT EXISTS (SELECT 1 FROM presupuestos WHERE p_id_presupuesto = id_presupuesto) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_NO_EXISTE';
+	END IF;
+    
 IF p_anio_inicio > p_anio_final THEN
-		SIGNAL SQLSTATE '45004' SET MESSAGE_TEXT = 'El año final no puede ser menor que el año de inicio.';
+		SIGNAL SQLSTATE '45004' SET MESSAGE_TEXT = 'ANIO_FINAL_MENOR';
 	END IF;
     
     IF p_anio_inicio = p_anio_final THEN
 		IF p_mes_inicio > p_mes_final THEN
-			SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = 'El mes final no puede ser menor que el mes de inicio.';
+			SIGNAL SQLSTATE '45005' SET MESSAGE_TEXT = 'MES_FINAL_MENOR';
 		END IF;
 	END IF;
     
-    IF EXISTS (SELECT 1 FROM presupuestos WHERE usuario_dni = p_usuario_dni AND estado = 'activo' 
-					AND p_id_presupuesto != id_presupuesto
+    IF EXISTS (SELECT 1 FROM presupuestos WHERE usuario_dni = p_usuario_dni AND estado = 'activo'
 					AND (anio_inicio * 100 + mes_inicio) <= (p_anio_final * 100 + p_mes_final) 
                     AND (anio_fin * 100 + mes_fin) >= (p_anio_inicio * 100 + p_mes_inicio)) THEN
-                    SIGNAL SQLSTATE '45006' SET MESSAGE_TEXT = 'No se puede actualizar presupuesto ya que se traslapa con otro presupuesto activo.';
+                    SIGNAL SQLSTATE '45006' SET MESSAGE_TEXT = 'TRASLAPACION';
 			END IF;
             
 	UPDATE presupuestos
@@ -98,8 +102,14 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_eliminar_presupuesto(IN p_id_presupuesto INT)
 BEGIN
+	
+    IF NOT EXISTS (SELECT 1 FROM presupuestos WHERE p_id_presupuesto = id_presupuesto) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_NO_EXISTE';
+	END IF;
+    
+    
 	IF EXISTS (SELECT 1 FROM transacciones WHERE id_presupuesto = p_id_presupuesto) THEN
-		SIGNAL SQLSTATE '45002' SET MESSAGE_TEXT = 'No se pudo eliminar el presupuesto, esta asociada a una transaccion';
+		SIGNAL SQLSTATE '45002' SET MESSAGE_TEXT = 'PRESUPUESTO_ASOCIADO';
 	ELSE
 		DELETE FROM presupuestos WHERE id_presupuesto = p_id_presupuesto;
 	END IF;
@@ -115,6 +125,11 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_consultar_presupuesto(IN p_id_presupuesto INT)
 BEGIN 
+
+    IF NOT EXISTS (SELECT 1 FROM presupuestos WHERE p_id_presupuesto = id_presupuesto) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_NO_EXISTE';
+	END IF;
+    
 	SELECT usuario_dni, nombre, descripcion, anio_inicio, mes_inicio, anio_fin, mes_fin, total_ingresos, 
 			total_gastos, total_ahorro, fecha_creacion, estado
 	FROM presupuestos

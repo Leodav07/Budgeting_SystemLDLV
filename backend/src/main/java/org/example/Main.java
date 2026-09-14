@@ -4,6 +4,8 @@ import io.javalin.Javalin;
 import org.example.config.DBConnection;
 import org.example.controller.UsuarioController;
 import org.example.exception.ApiExceptionController;
+import routes.CategoriaRoutes;
+import routes.PresupuestoRoutes;
 import routes.UsuarioRoutes;
 
 import java.sql.SQLException;
@@ -15,7 +17,8 @@ public class Main {
 
         Javalin app = Javalin.create();
         UsuarioRoutes.registrar(app);
-
+        CategoriaRoutes.registrar(app);
+        PresupuestoRoutes.registrar(app);
         app.exception(ApiExceptionController.class, (err, ctx) ->{
                 ctx.status(err.getStatus()).json(Map.of(
                         "codigo", err.getCodigo(),

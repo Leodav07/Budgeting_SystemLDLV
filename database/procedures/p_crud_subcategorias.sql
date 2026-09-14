@@ -9,6 +9,11 @@ CREATE PROCEDURE sp_insertar_subcategoria(IN p_id_categoria INT,
 									IN p_descripcion VARCHAR(255),
                                     IN p_creado_por VARCHAR(100))
 BEGIN
+
+	IF NOT EXISTS (SELECT 1 FROM categorias WHERE p_id_categoria = id_categoria) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'CATEGORIA_NO_EXISTE';
+	END IF;
+    
 	INSERT INTO subcategorias (id_categoria, nombre, descripcion, estado, por_defecto,
 						  creado_por)
     VALUES (p_id_categoria, p_nombre, p_descripcion, true, false, p_creado_por);
@@ -29,6 +34,11 @@ CREATE PROCEDURE sp_actualizar_subcategoria(IN p_id_subcategoria INT,
 										 IN p_modificado_por VARCHAR(100))
 
 BEGIN 
+
+	IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE p_id_subcategoria = id_subcategoria) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_EXISTE';
+	END IF;
+    
 	UPDATE subcategorias
     SET nombre = p_nombre, descripcion = p_descripcion, estado = p_estado, modificado_por = p_modificado_por
 	WHERE id_subcategoria = p_id_subcategoria;
