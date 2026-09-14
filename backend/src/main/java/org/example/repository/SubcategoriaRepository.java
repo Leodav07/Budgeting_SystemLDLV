@@ -1,14 +1,10 @@
 package org.example.repository;
 
 import org.example.config.DBConnection;
-import org.example.dto.categoria.ActualizarCategoriaRequest;
-import org.example.dto.categoria.CrearCategoriaRequest;
 import org.example.dto.subcategoria.ActualizarSubcategoriaRequest;
 import org.example.dto.subcategoria.CrearSubcategoriaRequest;
 import org.example.exception.ApiExceptionController;
-import org.example.model.Categoria;
 import org.example.model.Especiales.CategoriaSubcategoria;
-import org.example.model.Subcategoria;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;

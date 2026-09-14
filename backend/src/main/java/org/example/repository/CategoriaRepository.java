@@ -3,13 +3,10 @@ package org.example.repository;
 import org.example.config.DBConnection;
 import org.example.dto.categoria.ActualizarCategoriaRequest;
 import org.example.dto.categoria.CrearCategoriaRequest;
-import org.example.dto.usuario.ActualizarUsuarioRequest;
 import org.example.exception.ApiExceptionController;
 import org.example.model.Categoria;
-import org.example.model.Usuario;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 

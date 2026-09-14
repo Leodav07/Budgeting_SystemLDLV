@@ -16,19 +16,19 @@ CREATE PROCEDURE sp_insertar_obligacion(IN p_usuario_dni VARCHAR(18),
 
 BEGIN 
 	IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE id_subcategoria = p_id_subcategoria AND estado = true) THEN
-		SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = 'La categoria no existe o no esta activa.';
+		SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_EXISTE_DESACTIVADA';
 	END IF;
     
 	IF p_fecha_final IS NOT NULL THEN
 		IF p_fecha_final < p_fecha_inicio THEN
-			SIGNAL SQLSTATE '45010' SET MESSAGE_TEXT = 'La fecha final debe ser mayor que la fecha inicial.';
+			SIGNAL SQLSTATE '45010' SET MESSAGE_TEXT = 'FECHA_FINAL_MAYOR';
 		END IF;
 	END IF;
     
     IF NOT EXISTS (SELECT 1 FROM subcategorias s
 		INNER JOIN categorias c ON s.id_categoria = c.id_categoria
         WHERE s.id_subcategoria = p_id_subcategoria AND c.tipo = 'gasto') THEN
-		SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = 'La subcategoria debe pertenecer al tipo GASTO dentro de categoria.';
+		SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_GASTO';
 	END IF;
     
     INSERT INTO obligaciones_fijas (usuario_dni, id_subcategoria, nombre, descripcion, monto_fijo,
@@ -58,20 +58,25 @@ CREATE PROCEDURE sp_actualizar_obligacion(IN p_id_obligacion INT,
                                         IN p_modificado_por VARCHAR(100))
 
 BEGIN 
-IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE id_subcategoria = p_id_subcategoria AND estado = true) THEN
-		SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = 'La categoria no existe o no esta activa.';
+
+	IF NOT EXISTS (SELECT 1 FROM obligaciones_fijas WHERE p_id_obligacion = id_obligacion) THEN
+		SIGNAL SQLSTATE'45000' SET MESSAGE_TEXT = 'OBLIGACION_NO_EXISTE';
+        END IF;
+        
+	IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE id_subcategoria = p_id_subcategoria AND estado = true) THEN
+		SIGNAL SQLSTATE '45009' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_EXISTE_DESACTIVADA';
 	END IF;
     
 	IF p_fecha_final IS NOT NULL THEN
 		IF p_fecha_final < p_fecha_inicio THEN
-			SIGNAL SQLSTATE '45010' SET MESSAGE_TEXT = 'La fecha final debe ser mayor que la fecha inicial.';
+			SIGNAL SQLSTATE '45010' SET MESSAGE_TEXT = 'FECHA_FINAL_MAYOR';
 		END IF;
 	END IF;
     
     IF NOT EXISTS (SELECT 1 FROM subcategorias s
 		INNER JOIN categorias c ON s.id_categoria = c.id_categoria
         WHERE s.id_subcategoria = p_id_subcategoria AND c.tipo = 'gasto') THEN
-		SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = 'La subcategoria debe pertenecer al tipo GASTO dentro de categoria.';
+		SIGNAL SQLSTATE '45011' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_GASTO';
 	END IF;
     
     UPDATE obligaciones_fijas
@@ -93,6 +98,10 @@ DELIMITER $$
 CREATE PROCEDURE sp_eliminar_obligacion(IN p_id_obligacion INT,
 										IN p_modificado_por VARCHAR(100))
 BEGIN
+	IF NOT EXISTS (SELECT 1 FROM obligaciones_fijas WHERE p_id_obligacion = id_obligacion) THEN
+		SIGNAL SQLSTATE'45000' SET MESSAGE_TEXT = 'OBLIGACION_NO_EXISTE';
+        END IF;
+        
 	UPDATE obligaciones_fijas
     SET vigente = false, modificado_por = p_modificado_por
     WHERE id_obligacion = p_id_obligacion;
@@ -108,6 +117,11 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_consultar_obligacion(IN p_id_obligacion INT)
 BEGIN 
+
+IF NOT EXISTS (SELECT 1 FROM obligaciones_fijas WHERE p_id_obligacion = id_obligacion) THEN
+		SIGNAL SQLSTATE'45000' SET MESSAGE_TEXT = 'OBLIGACION_NO_EXISTE';
+        END IF;
+        
 	SELECT o.usuario_dni, o.id_subcategoria, o.nombre AS nombre_obligacion, o.descripcion AS descripcion_obligacion,
 		o.monto_fijo, o.vence_dia, o.vigente, o.fecha_inicio, o.fecha_final,
         sc.nombre AS nombre_subcategoria, sc.descripcion AS descripcion_subcategoria, sc.estado, sc.por_defecto
@@ -128,6 +142,10 @@ DELIMITER $$
 CREATE PROCEDURE sp_listar_obligaciones_usuario(IN p_usuario_dni VARCHAR(18),
 												IN p_vigente BOOLEAN)
 BEGIN 
+	IF NOT EXISTS (SELECT 1 FROM usuarios WHERE p_usuario_dni = usuario_dni) THEN
+		SIGNAL SQLSTATE'45000' SET MESSAGE_TEXT = 'USUARIO_NO_EXISTE';
+        END IF;
+        
 	SELECT o.usuario_dni, o.id_subcategoria, o.nombre AS nombre_obligacion, o.descripcion AS descripcion_obligacion,
 		o.monto_fijo, o.vence_dia, o.vigente, o.fecha_inicio, o.fecha_final
 	FROM obligaciones_fijas o
