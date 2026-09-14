@@ -17,6 +17,7 @@ public class Main {
         PresupuestoRoutes.registrar(app);
         SubcategoriaRoutes.registrar(app);
         ObligacionRoutes.registrar(app);
+        TransaccionRoutes.registrar(app);
 
         app.exception(ApiExceptionController.class, (err, ctx) ->{
                 ctx.status(err.getStatus()).json(Map.of(

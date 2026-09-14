@@ -21,14 +21,14 @@ BEGIN
 	IF NOT EXISTS (SELECT 1 FROM subcategorias sc
                 INNER JOIN categorias c ON sc.id_categoria = c.id_categoria
                 WHERE sc.id_subcategoria = p_id_subcategoria AND c.tipo = p_tipo) THEN
-		SIGNAL SQLSTATE '45015' SET MESSAGE_TEXT = 'El tipo de transaccion debe coincidir con el mismo tipo de categoria.';
+		SIGNAL SQLSTATE '45015' SET MESSAGE_TEXT = 'TIPO_TRANSACCION_NO_COINCIDE_CAT';
 	END IF;
 	
     IF NOT EXISTS (SELECT 1 FROM presupuestos p
                 WHERE p.id_presupuesto = p_id_presupuesto
                 AND (p.anio_inicio * 100 + p.mes_inicio) <= (p_anio * 100 + p_mes) 
                 AND (p.anio_fin * 100 + p.mes_fin) >= (p_anio * 100 + p_mes)) THEN
-		SIGNAL SQLSTATE '45016' SET MESSAGE_TEXT = 'El año y mes deben estar dentro del periodo de vigencia del presupuesto asociado.';
+		SIGNAL SQLSTATE '45016' SET MESSAGE_TEXT = 'ANIO_Y_MES_NO_DENTRO_DE_VIGENCIA_PRESUPUESTO';
 	END IF;
 
 	INSERT INTO transacciones (usuario_dni, id_presupuesto, anio, mes, id_subcategoria, tipo, descripcion, monto, fecha_ocurrido, metodo_pago, num_factura, observaciones, creado_por)
@@ -58,17 +58,21 @@ CREATE PROCEDURE sp_actualizar_transaccion(IN p_id_transaccion INT,
                                                     IN p_observaciones VARCHAR(255),
                                                     IN p_modificado_por VARCHAR(100))
 BEGIN
+	IF NOT EXISTS (SELECT 1 FROM transacciones WHERE id_transaccion = p_id_transaccion) THEN
+				SIGNAL SQLSTATE '45015' SET MESSAGE_TEXT = 'TRANSACCION_NO_EXISTE';
+	END IF;
+
 	IF NOT EXISTS (SELECT 1 FROM subcategorias sc
                 INNER JOIN categorias c ON sc.id_categoria = c.id_categoria
                 WHERE sc.id_subcategoria = p_id_subcategoria AND c.tipo = p_tipo) THEN
-		SIGNAL SQLSTATE '45015' SET MESSAGE_TEXT = 'El tipo de transaccion debe coincidir con el mismo tipo de categoria.';
+		SIGNAL SQLSTATE '45015' SET MESSAGE_TEXT = 'TIPO_TRANSACCION_NO_COINCIDE_CAT';
 	END IF;
-    
-	   IF NOT EXISTS (SELECT 1 FROM presupuestos p
+	
+    IF NOT EXISTS (SELECT 1 FROM presupuestos p
                 WHERE p.id_presupuesto = p_id_presupuesto
                 AND (p.anio_inicio * 100 + p.mes_inicio) <= (p_anio * 100 + p_mes) 
                 AND (p.anio_fin * 100 + p.mes_fin) >= (p_anio * 100 + p_mes)) THEN
-		SIGNAL SQLSTATE '45016' SET MESSAGE_TEXT = 'El año y mes deben estar dentro del periodo de vigencia del presupuesto asociado.';
+		SIGNAL SQLSTATE '45016' SET MESSAGE_TEXT = 'ANIO_Y_MES_NO_DENTRO_DE_VIGENCIA_PRESUPUESTO';
 	END IF;
     
     UPDATE transacciones
@@ -88,9 +92,12 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_eliminar_transaccion(IN p_id_transaccion INT)
 BEGIN
-	
+	IF NOT EXISTS (SELECT 1 FROM transacciones WHERE id_transaccion = p_id_transaccion) THEN
+				SIGNAL SQLSTATE '45015' SET MESSAGE_TEXT = 'TRANSACCION_NO_EXISTE';
+	END IF;
+    
     IF EXISTS (SELECT 1 FROM transacciones WHERE id_transaccion = p_id_transaccion AND tipo = 'ahorro') THEN
-		SIGNAL SQLSTATE '45018' SET MESSAGE_TEXT = 'Problemas al eliminar transacciones de tipo ahorro.';
+		SIGNAL SQLSTATE '45018' SET MESSAGE_TEXT = 'TRANSACCION_TIPO_AHORRO';
 	END IF;
     
     DELETE FROM transacciones WHERE id_transaccion = p_id_transaccion;
@@ -107,6 +114,10 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_consultar_transaccion(IN p_id_transaccion INT)
 BEGIN
+
+	IF NOT EXISTS (SELECT 1 FROM transacciones WHERE id_transaccion = p_id_transaccion) THEN
+				SIGNAL SQLSTATE '45015' SET MESSAGE_TEXT = 'TRANSACCION_NO_EXISTE';
+	END IF;
 	
     SELECT usuario_dni, id_presupuesto, anio, mes, id_subcategoria, tipo, descripcion, monto, fecha_ocurrido, metodo_pago, num_factura, observaciones, fecha_registro
     FROM transacciones
