@@ -1,15 +1,11 @@
 package org.example.repository;
 
 import org.example.config.DBConnection;
-import org.example.dto.obligacion.EliminarObligacionRequest;
-import org.example.dto.obligacion.ListarObligacionesRequest;
+
 import org.example.dto.transaccion.ActualizarTransaccionRequest;
 import org.example.dto.transaccion.CrearTransaccionRequest;
 import org.example.exception.ApiExceptionController;
-import org.example.model.Especiales.ObligacionSubcategoria;
 import org.example.model.Especiales.TransaccionEspecial;
-
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;

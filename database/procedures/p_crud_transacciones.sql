@@ -102,7 +102,7 @@ BEGIN
     
     DELETE FROM transacciones WHERE id_transaccion = p_id_transaccion;
 
-END;
+END $$
 
 DELIMITER ;
 
@@ -135,6 +135,10 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_listar_transacciones_presupuesto(IN p_id_presupuesto INT)
 BEGIN
+	
+    IF NOT EXISTS (SELECT 1 FROM presupuestos WHERE id_presupuesto = p_id_presupuesto) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_NO_EXISTE';
+        END IF;
 	
     SELECT t.usuario_dni, t.id_presupuesto, t.anio, t.mes, t.id_subcategoria, t.tipo, t.descripcion, t.monto, t.fecha_ocurrido, t.metodo_pago, t.num_factura, t.observaciones, t.fecha_registro
     FROM transacciones t
