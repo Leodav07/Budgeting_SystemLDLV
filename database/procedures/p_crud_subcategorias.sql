@@ -56,9 +56,13 @@ DELIMITER $$
 CREATE PROCEDURE sp_eliminar_subcategoria(IN p_id_subcategoria INT)
 
 BEGIN 
+	IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE p_id_subcategoria = id_subcategoria) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_EXISTE';
+	END IF;
+    
 	IF EXISTS (SELECT 1 FROM presupuestos_detalles WHERE id_subcategoria = p_id_subcategoria) 
 				OR EXISTS (SELECT 1 FROM transacciones WHERE id_subcategoria = p_id_subcategoria) THEN
-				SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'No es posible eliminar esta categoria ya que esta en uso en presupuestos o transacciones.';
+				SIGNAL SQLSTATE '45003' SET MESSAGE_TEXT = 'NO_ELIMINAR_SUBCATEGORIA';
 			ELSE
 				DELETE FROM subcategorias WHERE id_subcategoria = p_id_subcategoria;
 	END IF;
@@ -76,6 +80,11 @@ DELIMITER $$
 CREATE PROCEDURE sp_consultar_subcategoria(IN p_id_subcategoria INT)
 
 BEGIN 
+
+IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE p_id_subcategoria = id_subcategoria) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_EXISTE';
+	END IF;
+    
 	SELECT c.id_categoria, c.nombre AS nombre_categoria, c.descripcion AS descripcion_categoria, c.tipo, sc.nombre AS nombre_subcategoria,
     sc.descripcion AS descripcion_subcategoria, sc.estado, sc.por_defecto
     FROM categorias c 
@@ -95,6 +104,16 @@ DELIMITER $$
 CREATE PROCEDURE sp_listar_subcategorias_por_categoria(IN p_id_categoria INT)
 
 BEGIN 
+
+IF NOT EXISTS (
+    SELECT 1
+    FROM categorias
+    WHERE id_categoria = p_id_categoria
+	) THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'CATEGORIA_NO_EXISTE';
+	END IF;
+    
 	SELECT c.id_categoria, c.nombre AS nombre_categoria, c.descripcion AS descripcion_categoria, c.tipo, sc.nombre AS nombre_subcategoria,
     sc.descripcion AS descripcion_subcategoria, sc.estado, sc.por_defecto
     FROM categorias c 

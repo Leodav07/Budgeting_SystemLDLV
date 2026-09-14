@@ -38,7 +38,7 @@ public class PresupuestoRepository {
             statement.setBigDecimal(8, presupuestorq.p_total_ingresos());
             statement.setBigDecimal(9, presupuestorq.p_total_gastos());
             statement.setBigDecimal(10, presupuestorq.p_total_ahorro());
-            statement.setString(8, presupuestorq.p_creado_por());
+            statement.setString(11, presupuestorq.p_creado_por());
 
             statement.execute();
 
@@ -173,15 +173,16 @@ public class PresupuestoRepository {
                 result.getInt("id_presupuesto"),
                 result.getString("usuario_dni"),
                 result.getString("nombre"),
+                result.getString("descripcion"),
                 result.getInt("anio_inicio"),
                 result.getInt("mes_inicio"),
-                result.getInt("anio_final"),
-                result.getInt("mes_final"),
+                result.getInt("anio_fin"),
+                result.getInt("mes_fin"),
                 result.getBigDecimal("total_ingresos"),
                 result.getBigDecimal("total_gastos"),
                 result.getBigDecimal("total_ahorro"),
                 result.getObject("fecha_creacion", LocalDateTime.class),
-                result.getBoolean("estado")
+                result.getString("estado")
 
         );
     }

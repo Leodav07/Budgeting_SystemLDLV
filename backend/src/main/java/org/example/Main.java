@@ -1,11 +1,10 @@
 package org.example;
 
 import io.javalin.Javalin;
-import org.example.config.DBConnection;
-import org.example.controller.UsuarioController;
 import org.example.exception.ApiExceptionController;
 import routes.CategoriaRoutes;
 import routes.PresupuestoRoutes;
+import routes.SubcategoriaRoutes;
 import routes.UsuarioRoutes;
 
 import java.sql.SQLException;
@@ -19,6 +18,8 @@ public class Main {
         UsuarioRoutes.registrar(app);
         CategoriaRoutes.registrar(app);
         PresupuestoRoutes.registrar(app);
+        SubcategoriaRoutes.registrar(app);
+
         app.exception(ApiExceptionController.class, (err, ctx) ->{
                 ctx.status(err.getStatus()).json(Map.of(
                         "codigo", err.getCodigo(),

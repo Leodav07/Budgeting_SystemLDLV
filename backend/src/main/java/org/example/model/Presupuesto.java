@@ -7,6 +7,7 @@ public record Presupuesto (
         int id_presupuesto,
         String usuario_dni,
         String nombre,
+        String descripcion,
         Integer anio_inicio,
         Integer mes_inicio,
         Integer anio_fin,
@@ -15,6 +16,6 @@ public record Presupuesto (
         BigDecimal total_gastos,
         BigDecimal total_ahorro,
         LocalDateTime fecha_creacion,
-        Boolean estado
+        String estado
 ) {
 }

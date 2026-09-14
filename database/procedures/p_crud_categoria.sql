@@ -44,6 +44,15 @@ CREATE PROCEDURE sp_actualizar_categoria(IN p_id_categoria INT,
 									IN p_descripcion VARCHAR(250),
 									IN p_modificado_por VARCHAR(100))
 BEGIN
+	IF NOT EXISTS (
+    SELECT 1
+    FROM categorias
+    WHERE id_categoria = p_id_categoria
+	) THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'CATEGORIA_NO_EXISTE';
+	END IF;
+    
 	UPDATE categorias
     SET	nombre = p_nombre, descripcion = p_descripcion, 
 		modificado_por = p_modificado_por
@@ -61,13 +70,24 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_eliminar_categoria(IN p_categoria_id INT)
 BEGIN
+
 	DECLARE conteo INT;
+    
+    IF NOT EXISTS (
+    SELECT 1
+    FROM categorias
+    WHERE id_categoria = p_id_categoria
+	) THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'CATEGORIA_NO_EXISTE';
+	END IF;
+    
     SELECT COUNT(*) INTO conteo
     FROM subcategorias 
     WHERE id_categoria = p_categoria_id AND por_defecto = false AND estado = true;
     
     IF conteo > 0 THEN
-		SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'No es posible eliminar la categoria ya que cuenta con subcategorias activas.';
+		SIGNAL SQLSTATE '45001' SET MESSAGE_TEXT = 'SUBCATEGORIA_ACTIVA';
 	ELSE
 		DELETE FROM categorias WHERE id_categoria = p_categoria_id;
 	END IF;
@@ -83,7 +103,15 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_consultar_categoria(IN p_categoria_id INT)
 BEGIN
-SELECT * FROM categorias WHERE p_categoria_id = id_categoria;
+IF NOT EXISTS (
+    SELECT 1
+    FROM categorias
+    WHERE id_categoria = p_id_categoria
+	) THEN
+			SIGNAL SQLSTATE '45000'
+			SET MESSAGE_TEXT = 'CATEGORIA_NO_EXISTE';
+	END IF;
+SELECT id_categoria, nombre, descripcion, tipo, icono_nombre, color_hex, orden FROM categorias WHERE p_categoria_id = id_categoria;
 END $$
 
 DELIMITER ;
@@ -96,7 +124,7 @@ DELIMITER $$
 
 CREATE PROCEDURE sp_listar_categorias(IN p_tipo VARCHAR(20))
 BEGIN
-	SELECT * FROM categorias
+	SELECT  id_categoria, nombre, descripcion, tipo, icono_nombre, color_hex, orden FROM categorias
     WHERE (p_tipo IS NULL OR p_tipo = tipo);
 END $$
 

@@ -8,10 +8,7 @@ import org.example.exception.ApiExceptionController;
 import org.example.model.Categoria;
 import org.example.model.Usuario;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +27,12 @@ public class CategoriaRepository {
             statement.setString(3, categoriarq.p_tipo());
             statement.setString(4, categoriarq.p_icono_nombre());
             statement.setString(5, categoriarq.p_color_hex());
-            statement.setInt(6, categoriarq.p_orden());
+
+            if(categoriarq.p_orden() == null){
+                statement.setNull(6, Types.VARCHAR);
+            }else {
+                statement.setInt(6, categoriarq.p_orden());
+            }
             statement.setString(7, categoriarq.p_creado_por());
 
             statement.execute();

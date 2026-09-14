@@ -130,7 +130,7 @@ BEGIN
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_NO_EXISTE';
 	END IF;
     
-	SELECT usuario_dni, nombre, descripcion, anio_inicio, mes_inicio, anio_fin, mes_fin, total_ingresos, 
+	SELECT id_presupuesto, usuario_dni, nombre, descripcion, anio_inicio, mes_inicio, anio_fin, mes_fin, total_ingresos, 
 			total_gastos, total_ahorro, fecha_creacion, estado
 	FROM presupuestos
     WHERE id_presupuesto = p_id_presupuesto;
