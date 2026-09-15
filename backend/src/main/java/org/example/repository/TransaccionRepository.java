@@ -148,7 +148,7 @@ public class TransaccionRepository {
         List<TransaccionEspecial> transaccionEspeciales = new ArrayList<>();
 
         try (Connection connection = dbConnection.getConnection();
-             CallableStatement statement = connection.prepareCall("{CALL sp_listar_transacciones(?)}")){
+             CallableStatement statement = connection.prepareCall("{CALL sp_listar_transacciones_presupuesto(?)}")){
             statement.setString(1, id);
             try (ResultSet resultado = statement.executeQuery()) {
                 while (resultado.next()) {
@@ -179,6 +179,7 @@ public class TransaccionRepository {
                 result.getString("descripcion"),
                 result.getBigDecimal("monto"),
                 (LocalDateTime) result.getObject("fecha_ocurrido"),
+                result.getString("metodo_pago"),
                 result.getString("num_factura"),
                 result.getString("observaciones"),
                 (LocalDateTime) result.getObject("fecha_registro")

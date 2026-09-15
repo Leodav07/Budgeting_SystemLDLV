@@ -13,6 +13,7 @@ public record TransaccionEspecial (
         String descripcion,
         BigDecimal monto,
         LocalDateTime fecha_ocurrido,
+        String metodo_pago,
         String num_factura,
         String observaciones,
         LocalDateTime fecha_registro

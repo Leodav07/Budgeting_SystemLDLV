@@ -4,12 +4,9 @@ import org.example.config.DBConnection;
 import org.example.dto.obligacion.ActualizarObligacionRequest;
 import org.example.dto.obligacion.CrearObligacionRequest;
 import org.example.dto.obligacion.EliminarObligacionRequest;
-import org.example.dto.obligacion.ListarObligacionesRequest;
-import org.example.dto.subcategoria.ActualizarSubcategoriaRequest;
-import org.example.dto.subcategoria.CrearSubcategoriaRequest;
 import org.example.exception.ApiExceptionController;
-import org.example.model.Especiales.CategoriaSubcategoria;
 import org.example.model.Especiales.ObligacionSubcategoria;
+import org.example.model.Especiales.ObligacionesUsuarios;
 
 import java.sql.CallableStatement;
 import java.sql.Connection;
@@ -144,18 +141,18 @@ public class ObligacionRepository {
     }
 
 
-    public List<ObligacionSubcategoria> Listar(String id, ListarObligacionesRequest obligacionesrq) throws SQLException{
+    public List<ObligacionesUsuarios> Listar(String id, Boolean vigente) throws SQLException{
 
-        List<ObligacionSubcategoria> obligacionSubcategorias = new ArrayList<>();
+        List<ObligacionesUsuarios> obligacionesUsuarios = new ArrayList<>();
 
         try (Connection connection = dbConnection.getConnection();
              CallableStatement statement = connection.prepareCall("{CALL sp_listar_obligaciones_usuario(?,?)}")){
             statement.setString(1, id);
-            statement.setBoolean(2, obligacionesrq.p_vigente());
+            statement.setBoolean(2, vigente);
 
             try (ResultSet resultado = statement.executeQuery()) {
                 while (resultado.next()) {
-                    obligacionSubcategorias.add(mapearObligacionSubcategoria(resultado));
+                    obligacionesUsuarios.add(mapearObligacionesUsuarios(resultado));
                 }
             }
         }catch(SQLException err){
@@ -167,7 +164,7 @@ public class ObligacionRepository {
             throw err;
         }
 
-        return obligacionSubcategorias;
+        return obligacionesUsuarios;
     }
 
 
@@ -186,6 +183,21 @@ public class ObligacionRepository {
                 result.getString("descripcion_subcategoria"),
                 result.getBoolean("estado"),
                 result.getBoolean("por_defecto")
+
+        );
+    }
+
+    private ObligacionesUsuarios mapearObligacionesUsuarios(ResultSet result) throws SQLException {
+        return new ObligacionesUsuarios(
+                result.getString("usuario_dni"),
+                result.getInt("id_subcategoria"),
+                result.getString("nombre_obligacion"),
+                result.getString("descripcion_obligacion"),
+                result.getBigDecimal("monto_fijo"),
+                result.getInt("vence_dia"),
+                result.getBoolean("vigente"),
+                result.getDate("fecha_inicio"),
+                result.getDate("fecha_final")
 
         );
     }

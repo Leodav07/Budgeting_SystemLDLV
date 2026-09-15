@@ -1,14 +1,9 @@
 package org.example.controller;
 
 import io.javalin.http.Context;
-import org.example.dto.categoria.ActualizarCategoriaRequest;
-import org.example.dto.categoria.CrearCategoriaRequest;
 import org.example.dto.presupuesto.ActualizarPresupuestoRequest;
 import org.example.dto.presupuesto.CrearPresupuestoRequest;
-import org.example.dto.presupuesto.ListarPresupuestoUsuarioRequest;
-import org.example.model.Categoria;
 import org.example.model.Presupuesto;
-import org.example.repository.CategoriaRepository;
 import org.example.repository.PresupuestoRepository;
 
 import java.sql.SQLException;
@@ -58,8 +53,8 @@ public class PresupuestoController {
 
     public void listarPresupuestos(Context ctx) throws SQLException {
         String id = ctx.pathParam("id");
-        ListarPresupuestoUsuarioRequest presupuestorq = ctx.bodyAsClass(ListarPresupuestoUsuarioRequest.class);
-        List<Presupuesto> presupuestos = repository.Listar(id, presupuestorq);
+        String estado = ctx.queryParam("estado");
+        List<Presupuesto> presupuestos = repository.Listar(id, estado);
 
         ctx.json(presupuestos);
     }

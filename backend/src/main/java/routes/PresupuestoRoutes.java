@@ -12,6 +12,6 @@ public class PresupuestoRoutes {
         app.put("/api/presupuestos/{id}", presupuestoController::actualizarPresupuesto);
         app.patch("/api/presupuestos/{id}", presupuestoController::eliminarPresupuesto);
         app.get("/api/presupuestos/{id}", presupuestoController::consultarPresupuestos);
-        app.get("/api/presupuestos", presupuestoController::listarPresupuestos);
+        app.get("/api/usuarios/{id}/presupuestos", presupuestoController::listarPresupuestos);
     }
 }

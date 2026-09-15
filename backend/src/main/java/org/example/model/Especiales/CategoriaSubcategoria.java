@@ -1,7 +1,7 @@
 package org.example.model.Especiales;
 
 public record CategoriaSubcategoria (
-        int c_id_categoria,
+        int id_categoria,
         String nombre_categoria,
         String descripcion_categoria,
         String c_tipo,

@@ -107,13 +107,13 @@ public class CategoriaRepository {
     }
 
 
-    public List<Categoria> Listar() throws SQLException{
+    public List<Categoria> Listar(String tipo) throws SQLException{
 
         List<Categoria> categorias = new ArrayList<>();
 
         try (Connection connection = dbConnection.getConnection();
-             CallableStatement statement = connection.prepareCall("{CALL sp_listar_categorias()}")){
-
+             CallableStatement statement = connection.prepareCall("{CALL sp_listar_categorias(?)}")){
+            statement.setString(1, tipo);
             try (ResultSet resultado = statement.executeQuery()) {
                 while (resultado.next()) {
                     categorias.add(mapearCategoria(resultado));

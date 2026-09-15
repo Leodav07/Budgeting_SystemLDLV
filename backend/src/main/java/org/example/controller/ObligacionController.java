@@ -1,15 +1,11 @@
 package org.example.controller;
 
 import io.javalin.http.Context;
-import org.example.dto.categoria.ActualizarCategoriaRequest;
-import org.example.dto.categoria.CrearCategoriaRequest;
 import org.example.dto.obligacion.ActualizarObligacionRequest;
 import org.example.dto.obligacion.CrearObligacionRequest;
 import org.example.dto.obligacion.EliminarObligacionRequest;
-import org.example.dto.obligacion.ListarObligacionesRequest;
-import org.example.model.Categoria;
 import org.example.model.Especiales.ObligacionSubcategoria;
-import org.example.repository.CategoriaRepository;
+import org.example.model.Especiales.ObligacionesUsuarios;
 import org.example.repository.ObligacionRepository;
 
 import java.sql.SQLException;
@@ -60,8 +56,9 @@ public class ObligacionController {
 
     public void listarObligaciones(Context ctx) throws SQLException {
         String id = ctx.pathParam("id");
-        ListarObligacionesRequest obligacionrq = ctx.bodyAsClass(ListarObligacionesRequest.class);
-        List<ObligacionSubcategoria> obligacionSubcategoria = repository.Listar(id, obligacionrq);
-        ctx.json(obligacionSubcategoria);
+        String vigente = ctx.queryParam("vigente");
+        Boolean pVigente = vigente == null ? null : Boolean.parseBoolean(vigente);
+        List<ObligacionesUsuarios> obligacionesUsuarios = repository.Listar(id, pVigente);
+        ctx.json(obligacionesUsuarios);
     }
 }

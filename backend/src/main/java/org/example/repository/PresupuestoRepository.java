@@ -1,16 +1,11 @@
 package org.example.repository;
 
 import org.example.config.DBConnection;
-import org.example.dto.categoria.ActualizarCategoriaRequest;
-import org.example.dto.categoria.CrearCategoriaRequest;
 import org.example.dto.presupuesto.ActualizarPresupuestoRequest;
 import org.example.dto.presupuesto.CrearPresupuestoRequest;
-import org.example.dto.presupuesto.ListarPresupuestoUsuarioRequest;
 import org.example.exception.ApiExceptionController;
-import org.example.model.Categoria;
 import org.example.model.Presupuesto;
 
-import java.math.BigDecimal;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -147,7 +142,7 @@ public class PresupuestoRepository {
     }
 
 
-    public List<Presupuesto> Listar(String usuario_dni, ListarPresupuestoUsuarioRequest presupuestorq) throws SQLException{
+    public List<Presupuesto> Listar(String usuario_dni, String estado) throws SQLException{
 
         List<Presupuesto> presupuestos = new ArrayList<>();
 
@@ -155,7 +150,7 @@ public class PresupuestoRepository {
              CallableStatement statement = connection.prepareCall("{CALL sp_listar_presupuestos_usuario(?,?)}")){
 
             statement.setString(1, usuario_dni);
-            statement.setString(2, presupuestorq.p_estado());
+            statement.setString(2, estado);
 
             try (ResultSet resultado = statement.executeQuery()) {
                 while (resultado.next()) {

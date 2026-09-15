@@ -53,7 +53,8 @@ public class CategoriaController {
     }
 
     public void listarCategorias(Context ctx) throws SQLException {
-        List<Categoria> categorias = repository.Listar();
+        String tipo = ctx.queryParam("tipo");
+        List<Categoria> categorias = repository.Listar(tipo);
 
         ctx.json(categorias);
     }
