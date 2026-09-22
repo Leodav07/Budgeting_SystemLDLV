@@ -139,9 +139,88 @@ DELIMITER $$
 CREATE PROCEDURE sp_cerrar_presupuesto(IN p_id_presupuesto INT,
 										IN p_modificado_por VARCHAR(100))
 BEGIN
+	DECLARE p_anio_fin MEDIUMINT;
+    DECLARE p_mes_fin MEDIUMINT;
+    DECLARE p_estado VARCHAR(20);
+    
+    IF NOT EXISTS (SELECT 1 FROM presupuestos WHERE id_presupuesto = p_id_presupuesto) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_NO_EXISTE';
+	END IF;
+    
+    SELECT anio_fin, mes_fin, estado INTO p_anio_fin, p_mes_fin, p_estado
+    FROM presupuestos WHERE id_presupuesto = p_id_presupuesto;
 	
+    
+    IF ((p_anio_fin*100)+p_mes_fin > (YEAR(CURDATE())*100) + MONTH(curdate())) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_AUN_VIGENTE';
+	END IF;
 	
+    UPDATE presupuestos SET estado = 'cerrado', modificado_por = p_modificado_por WHERE id_presupuesto = p_id_presupuesto;
+    
+    WITH t1 AS (
+    SELECT SUM(CASE WHEN tipo = 'ingreso' THEN monto ELSE 0 END) AS ingresos,
+		  SUM(CASE WHEN tipo = 'gasto' THEN monto ELSE 0 END) AS gastos,
+          SUM(CASE WHEN tipo = 'ahorro' THEN monto ELSE 0 END) AS ahorros
+	FROM transacciones WHERE id_presupuesto = p_id_presupuesto
+    )
+    SELECT IFNULL(t1.ingresos, 0) AS total_ingresos, IFNULL(t1.gastos, 0) AS total_gastos, IFNULL(t1.ahorros, 0) AS total_ahorros, (IFNULL(t1.ingresos, 0) - IFNULL(t1.gastos, 0)) AS balance_final
+    FROM t1;
+    
 END $$
 
 DELIMITER ;
+
+-- sp registrar la transaccion completa
+
+DROP PROCEDURE IF EXISTS sp_registrar_transaccion_completa;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_registrar_transaccion_completa(IN p_usuario_dni VARCHAR(18), 
+													IN p_id_presupuesto INT, 
+                                                    IN p_anio MEDIUMINT, 
+                                                    IN p_mes TINYINT,
+													IN p_id_subcategoria INT, 
+                                                    IN p_tipo VARCHAR(20),
+                                                    IN p_descripcion VARCHAR(255),
+                                                    IN p_monto DECIMAL(8,2), 
+                                                    IN p_fecha DATE, 
+                                                    IN p_metodo_pago VARCHAR(25),
+                                                    IN p_num_factura VARCHAR(20),
+                                                    IN p_observaciones VARCHAR(255),
+													IN p_creado_por VARCHAR(100))
+BEGIN
+	DECLARE f_tipo VARCHAR(20);
+    DECLARE f_id_categoria INT;
+    
+    IF NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = p_usuario_dni) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'USUARIO_NO_EXISTE';
+	END IF;
+    
+      IF NOT EXISTS (SELECT 1 FROM subcategorias WHERE id_subcategoria = p_id_subcategoria) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'SUBCATEGORIA_NO_EXISTE';
+	END IF;
+    
+    IF NOT(fn_validar_vigencia_presupuesto(STR_TO_DATE(CONCAT(p_anio,'-',p_mes,'-01'), '%Y-%m-%d'), p_id_presupuesto)) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'TRANSACCION_FUERA_DE_VIGENCIA';
+	END IF;
+	
+    SET f_id_categoria = fn_obtener_categoria_por_subcategoria(p_id_subcategoria);
+    
+    SELECT tipo INTO f_tipo FROM categorias WHERE id_categoria = f_id_categoria;
+    
+    IF p_tipo != f_tipo THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'TIPO_TRANSACCION_INVALIDO';
+	END IF;
+    
+    INSERT INTO transacciones (usuario_dni, id_presupuesto, anio, mes, id_subcategoria, tipo, descripcion, monto, fecha_ocurrido, metodo_pago, 
+							num_factura, observaciones, creado_por)
+	VALUES (p_usuario_dni, p_id_presupuesto, p_anio, p_mes, p_id_subcategoria, p_tipo, p_descripcion, p_monto, p_fecha, p_metodo_pago, 
+			p_num_factura, p_observaciones, p_creado_por);
+    
+
+END $$
+
+DELIMITER ;
+
 
