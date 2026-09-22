@@ -1,9 +1,16 @@
 <script setup>
 import { ref } from 'vue'
-import { RouterLink, RouterView } from 'vue-router'
-import ToastHost from '@/components/ToastHost.vue'
+import { RouterLink, RouterView, useRouter } from 'vue-router'
+import { useSession } from '@/services/session'
 
 const sidebarOpen = ref(false)
+const router = useRouter()
+const session = useSession()
+
+function logout() {
+  session.cerrarSesion()
+  router.push('/login')
+}
 
 const nav = [
   { to: '/', label: 'Resumen', icon: '🏠' },
@@ -40,6 +47,11 @@ const nav = [
           {{ item.label }}
         </RouterLink>
       </nav>
+
+      <div class="app-session">
+        <span class="cell-muted">Sesión: <strong>{{ session.dni.value }}</strong></span>
+        <button type="button" class="btn btn-secondary btn-sm" @click="logout">Cerrar sesión</button>
+      </div>
     </aside>
 
     <button
@@ -54,12 +66,20 @@ const nav = [
     <main class="app-main">
       <RouterView />
     </main>
-
-    <ToastHost />
   </div>
 </template>
 
 <style scoped>
+.app-session {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
 .mobile-toggle {
   display: none;
   position: fixed;

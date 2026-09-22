@@ -5,6 +5,7 @@ import { subcategoriaService } from '@/services/subcategoriaService'
 import { categoriaService } from '@/services/categoriaService'
 import { useCrud } from '@/composables/useCrud'
 import { useToast } from '@/composables/useToast'
+import { useSession } from '@/services/session'
 import AppModal from '@/components/AppModal.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -15,6 +16,7 @@ const props = defineProps({ idCategoria: { type: String, default: null } })
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const session = useSession()
 
 const { items: subcategorias, loading, error, run } = useCrud()
 const categorias = ref([])
@@ -59,12 +61,12 @@ function onPickCategoria() {
 
 // ---------- Crear ----------
 const showCreate = ref(false)
-const createForm = reactive({ p_nombre: '', p_descripcion: '', autor: '' })
+const createForm = reactive({ p_nombre: '', p_descripcion: '' })
 const createErrors = reactive({})
 const saving = ref(false)
 
 function openCreate() {
-  Object.assign(createForm, { p_nombre: '', p_descripcion: '', autor: '' })
+  Object.assign(createForm, { p_nombre: '', p_descripcion: '' })
   Object.keys(createErrors).forEach((k) => delete createErrors[k])
   showCreate.value = true
 }
@@ -72,7 +74,6 @@ function openCreate() {
 function validateCreate() {
   Object.keys(createErrors).forEach((k) => delete createErrors[k])
   if (!createForm.p_nombre.trim()) createErrors.p_nombre = 'El nombre es obligatorio.'
-  if (!createForm.autor.trim()) createErrors.autor = 'Indica quién lo crea.'
   return Object.keys(createErrors).length === 0
 }
 
@@ -86,7 +87,7 @@ async function submitCreate() {
           p_id_categoria: selectedCategoriaId.value,
           p_nombre: createForm.p_nombre.trim(),
           p_descripcion: createForm.p_descripcion.trim() || null,
-          p_creado_por: createForm.autor.trim(),
+          p_creado_por: session.dni.value,
         }),
       { successMessage: 'Subcategoria creada exitosamente.' },
     )
@@ -124,7 +125,7 @@ async function lookup() {
 }
 
 const showEdit = ref(false)
-const editForm = reactive({ p_nombre: '', p_descripcion: '', p_estado: true, autor: '' })
+const editForm = reactive({ p_nombre: '', p_descripcion: '', p_estado: true })
 const editErrors = reactive({})
 
 function openEdit() {
@@ -132,7 +133,6 @@ function openEdit() {
     p_nombre: lookupResult.value.nombre_subcategoria,
     p_descripcion: lookupResult.value.descripcion_subcategoria || '',
     p_estado: !!lookupResult.value.sc_estado,
-    autor: '',
   })
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   showEdit.value = true
@@ -141,7 +141,6 @@ function openEdit() {
 function validateEdit() {
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   if (!editForm.p_nombre.trim()) editErrors.p_nombre = 'El nombre es obligatorio.'
-  if (!editForm.autor.trim()) editErrors.autor = 'Indica quién lo modifica.'
   return Object.keys(editErrors).length === 0
 }
 
@@ -155,7 +154,7 @@ async function submitEdit() {
           p_nombre: editForm.p_nombre.trim(),
           p_descripcion: editForm.p_descripcion.trim() || null,
           p_estado: editForm.p_estado,
-          p_modificado_por: editForm.autor.trim(),
+          p_modificado_por: session.dni.value,
         }),
       { successMessage: 'Subcategoria actualizada exitosamente.' },
     )
@@ -297,11 +296,6 @@ async function confirmDelete() {
           <label>Descripción <span class="optional">(opcional)</span></label>
           <textarea v-model="createForm.p_descripcion" class="input" maxlength="255" />
         </div>
-        <div class="field">
-          <label>Creado por</label>
-          <input v-model="createForm.autor" class="input" :class="{ invalid: createErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="createErrors.autor">{{ createErrors.autor }}</span>
-        </div>
       </form>
       <template #footer>
         <button type="button" class="btn btn-secondary" @click="showCreate = false">Cancelar</button>
@@ -326,11 +320,6 @@ async function confirmDelete() {
         <div class="checkbox-row">
           <input id="sc_estado" type="checkbox" v-model="editForm.p_estado" />
           <label for="sc_estado">Activo</label>
-        </div>
-        <div class="field">
-          <label>Modificado por</label>
-          <input v-model="editForm.autor" class="input" :class="{ invalid: editErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="editErrors.autor">{{ editErrors.autor }}</span>
         </div>
       </form>
       <template #footer>

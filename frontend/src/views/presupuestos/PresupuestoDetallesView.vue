@@ -3,6 +3,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { presupuestoDetalleService } from '@/services/presupuestoDetalleService'
 import { useCrud } from '@/composables/useCrud'
+import { useSession } from '@/services/session'
 import AppModal from '@/components/AppModal.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -14,6 +15,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { items: detalles, loading, error, run } = useCrud()
+const session = useSession()
 const presupuestoIdInput = ref(props.idPresupuesto || '')
 const activePresupuestoId = ref(props.idPresupuesto || null)
 
@@ -57,12 +59,12 @@ function money(v) {
 
 // ---------- Crear ----------
 const showCreate = ref(false)
-const createForm = reactive({ p_id_subcategoria: '', p_monto_asignado: '', p_justificacion_monto: '', autor: '' })
+const createForm = reactive({ p_id_subcategoria: '', p_monto_asignado: '', p_justificacion_monto: '' })
 const createErrors = reactive({})
 const saving = ref(false)
 
 function openCreate() {
-  Object.assign(createForm, { p_id_subcategoria: '', p_monto_asignado: '', p_justificacion_monto: '', autor: '' })
+  Object.assign(createForm, { p_id_subcategoria: '', p_monto_asignado: '', p_justificacion_monto: '' })
   Object.keys(createErrors).forEach((k) => delete createErrors[k])
   showCreate.value = true
 }
@@ -71,7 +73,6 @@ function validateCreate() {
   Object.keys(createErrors).forEach((k) => delete createErrors[k])
   if (!createForm.p_id_subcategoria) createErrors.p_id_subcategoria = 'Obligatorio.'
   if (createForm.p_monto_asignado === '') createErrors.p_monto_asignado = 'Obligatorio.'
-  if (!createForm.autor.trim()) createErrors.autor = 'Indica quién lo crea.'
   return Object.keys(createErrors).length === 0
 }
 
@@ -86,7 +87,7 @@ async function submitCreate() {
           p_id_subcategoria: Number(createForm.p_id_subcategoria),
           p_monto_asignado: Number(createForm.p_monto_asignado),
           p_justificacion_monto: createForm.p_justificacion_monto.trim() || null,
-          p_creado_por: createForm.autor.trim(),
+          p_creado_por: session.dni.value,
         }),
       { successMessage: 'Detalle de presupuesto creado exitosamente.' },
     )
@@ -123,14 +124,13 @@ async function lookup() {
 }
 
 const showEdit = ref(false)
-const editForm = reactive({ p_monto_asignado: '', p_justificacion_monto: '', autor: '' })
+const editForm = reactive({ p_monto_asignado: '', p_justificacion_monto: '' })
 const editErrors = reactive({})
 
 function openEdit() {
   Object.assign(editForm, {
     p_monto_asignado: lookupResult.value.monto_asignado,
     p_justificacion_monto: lookupResult.value.justificacion_monto || '',
-    autor: '',
   })
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   showEdit.value = true
@@ -139,7 +139,6 @@ function openEdit() {
 function validateEdit() {
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   if (editForm.p_monto_asignado === '') editErrors.p_monto_asignado = 'Obligatorio.'
-  if (!editForm.autor.trim()) editErrors.autor = 'Indica quién lo modifica.'
   return Object.keys(editErrors).length === 0
 }
 
@@ -153,7 +152,7 @@ async function submitEdit() {
           p_id_presupuesto_detalle: Number(lookupId.value),
           p_monto_asignado: Number(editForm.p_monto_asignado),
           p_justificacion_monto: editForm.p_justificacion_monto.trim() || null,
-          p_modificado_por: editForm.autor.trim(),
+          p_modificado_por: session.dni.value,
         }),
       { successMessage: 'Detalle actualizado exitosamente.' },
     )
@@ -308,11 +307,6 @@ async function confirmDelete() {
           <label>Justificación <span class="optional">(opcional)</span></label>
           <textarea v-model="createForm.p_justificacion_monto" class="input" maxlength="255" />
         </div>
-        <div class="field">
-          <label>Creado por</label>
-          <input v-model="createForm.autor" class="input" :class="{ invalid: createErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="createErrors.autor">{{ createErrors.autor }}</span>
-        </div>
       </form>
       <template #footer>
         <button type="button" class="btn btn-secondary" @click="showCreate = false">Cancelar</button>
@@ -333,11 +327,6 @@ async function confirmDelete() {
         <div class="field">
           <label>Justificación <span class="optional">(opcional)</span></label>
           <textarea v-model="editForm.p_justificacion_monto" class="input" maxlength="255" />
-        </div>
-        <div class="field">
-          <label>Modificado por</label>
-          <input v-model="editForm.autor" class="input" :class="{ invalid: editErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="editErrors.autor">{{ editErrors.autor }}</span>
         </div>
       </form>
       <template #footer>

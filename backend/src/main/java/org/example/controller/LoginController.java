@@ -18,7 +18,7 @@ public class LoginController {
                                     "dni", logrq.dni()));
 
         }else{
-            ctx.status(401).json(Map.of("mensaje", "Fallido."));
+            ctx.status(401).json(Map.of("mensaje", "Credenciales Invalidas."));
         }
 
     }

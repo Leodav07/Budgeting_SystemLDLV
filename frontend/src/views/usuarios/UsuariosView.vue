@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { usuarioService } from '@/services/usuarioService'
 import { useCrud } from '@/composables/useCrud'
+import { useSession } from '@/services/session'
 import AppModal from '@/components/AppModal.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -9,6 +10,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import EmptyState from '@/components/EmptyState.vue'
 
 const { items: usuarios, loading, error, run } = useCrud()
+const session = useSession()
 const search = ref('')
 
 const filtered = computed(() => {
@@ -37,7 +39,7 @@ const emptyForm = () => ({
   s_apellido: '',
   correo_elec: '',
   psalario: '',
-  autor: '',
+  p_contrasenia: '',
 })
 
 const showForm = ref(false)
@@ -63,7 +65,6 @@ function openEdit(u) {
     s_apellido: u.segundo_apellido || '',
     correo_elec: u.email || '',
     psalario: u.salario ?? '',
-    autor: '',
   })
   clearErrors()
   showForm.value = true
@@ -80,7 +81,7 @@ function validate() {
   if (!form.p_apellido.trim()) formErrors.p_apellido = 'El primer apellido es obligatorio.'
   if (!form.correo_elec.trim()) formErrors.correo_elec = 'El correo es obligatorio.'
   if (form.psalario === '' || Number(form.psalario) < 0) formErrors.psalario = 'Ingresa un salario válido.'
-  if (!form.autor.trim()) formErrors.autor = formMode.value === 'create' ? 'Indica quién lo crea.' : 'Indica quién lo modifica.'
+  if (formMode.value === 'create' && !form.p_contrasenia) formErrors.p_contrasenia = 'La contraseña es obligatoria.'
   return Object.keys(formErrors).length === 0
 }
 
@@ -99,7 +100,8 @@ async function submitForm() {
             s_apellido: form.s_apellido.trim() || null,
             correo_elec: form.correo_elec.trim(),
             psalario: Number(form.psalario),
-            pcreado_por: form.autor.trim(),
+            pcreado_por: session.dni.value,
+            p_contrasenia: form.p_contrasenia,
           }),
         { successMessage: 'Usuario creado exitosamente.' },
       )
@@ -113,7 +115,7 @@ async function submitForm() {
             s_apellido: form.s_apellido.trim() || null,
             correo_elec: form.correo_elec.trim(),
             psalario: Number(form.psalario),
-            p_modificado_por: form.autor.trim(),
+            p_modificado_por: session.dni.value,
           }),
         { successMessage: 'Usuario actualizado exitosamente.' },
       )
@@ -135,10 +137,10 @@ function askDelete(u) {
   deleteTarget.value = u
 }
 
-async function confirmDelete(autor) {
+async function confirmDelete() {
   deleting.value = true
   try {
-    await run(() => usuarioService.eliminar(deleteTarget.value.usuario_dni, { p_modificado_por: autor }), {
+    await run(() => usuarioService.eliminar(deleteTarget.value.usuario_dni, { p_modificado_por: session.dni.value }), {
       successMessage: 'Usuario dado de baja.',
     })
     deleteTarget.value = null
@@ -271,10 +273,16 @@ function formatFecha(v) {
           <input v-model="form.psalario" type="number" step="0.01" min="0" class="input" :class="{ invalid: formErrors.psalario }" />
           <span class="field-error" v-if="formErrors.psalario">{{ formErrors.psalario }}</span>
         </div>
-        <div class="field">
-          <label>{{ formMode === 'create' ? 'Creado por' : 'Modificado por' }}</label>
-          <input v-model="form.autor" class="input" :class="{ invalid: formErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="formErrors.autor">{{ formErrors.autor }}</span>
+        <div class="field" v-if="formMode === 'create'">
+          <label>Contraseña</label>
+          <input
+            v-model="form.p_contrasenia"
+            type="password"
+            class="input"
+            :class="{ invalid: formErrors.p_contrasenia }"
+            autocomplete="new-password"
+          />
+          <span class="field-error" v-if="formErrors.p_contrasenia">{{ formErrors.p_contrasenia }}</span>
         </div>
       </form>
 
@@ -292,8 +300,6 @@ function formatFecha(v) {
       title="Dar de baja usuario"
       :message="`Se marcará como inactivo al usuario ${deleteTarget.usuario_dni} (${deleteTarget.primer_nombre} ${deleteTarget.primer_apellido}).`"
       confirm-label="Dar de baja"
-      require-input
-      input-label="Modificado por"
       :loading="deleting"
       @confirm="confirmDelete"
       @cancel="deleteTarget = null"

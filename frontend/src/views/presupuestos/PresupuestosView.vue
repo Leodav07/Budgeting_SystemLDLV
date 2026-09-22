@@ -3,6 +3,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { presupuestoService, PRESUPUESTO_ESTADOS } from '@/services/presupuestoService'
 import { useCrud } from '@/composables/useCrud'
+import { useSession } from '@/services/session'
 import AppModal from '@/components/AppModal.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -13,6 +14,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { items: presupuestos, loading, error, run } = useCrud()
+const session = useSession()
 const dniInput = ref(route.query.usuario || '')
 const activeDni = ref(route.query.usuario || null)
 const estadoFiltro = ref('') // '' = todas
@@ -62,7 +64,6 @@ const emptyCreate = () => ({
   p_total_ingresos: 0,
   p_total_gastos: 0,
   p_total_ahorro: 0,
-  autor: '',
 })
 
 const showCreate = ref(false)
@@ -80,7 +81,6 @@ function validateCreate() {
   Object.keys(createErrors).forEach((k) => delete createErrors[k])
   if (!createForm.p_usuario_dni.trim()) createErrors.p_usuario_dni = 'El DNI del usuario es obligatorio.'
   if (!createForm.p_nombre.trim()) createErrors.p_nombre = 'El nombre es obligatorio.'
-  if (!createForm.autor.trim()) createErrors.autor = 'Indica quién lo crea.'
   return Object.keys(createErrors).length === 0
 }
 
@@ -101,7 +101,7 @@ async function submitCreate() {
           p_total_ingresos: Number(createForm.p_total_ingresos),
           p_total_gastos: Number(createForm.p_total_gastos),
           p_total_ahorro: Number(createForm.p_total_ahorro),
-          p_creado_por: createForm.autor.trim(),
+          p_creado_por: session.dni.value,
         }),
       { successMessage: 'Presupuesto creado exitosamente.' },
     )
@@ -134,7 +134,6 @@ function openEdit(p) {
     p_total_gastos: p.total_gastos,
     p_total_ahorro: p.total_ahorro,
     p_estado: p.estado,
-    autor: '',
   })
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   showEdit.value = true
@@ -144,7 +143,6 @@ function validateEdit() {
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   if (!editForm.p_usuario_dni?.trim()) editErrors.p_usuario_dni = 'Obligatorio.'
   if (!editForm.p_nombre?.trim()) editErrors.p_nombre = 'Obligatorio.'
-  if (!editForm.autor?.trim()) editErrors.autor = 'Indica quién lo modifica.'
   return Object.keys(editErrors).length === 0
 }
 
@@ -166,7 +164,7 @@ async function submitEdit() {
           p_total_gastos: Number(editForm.p_total_gastos),
           p_total_ahorro: Number(editForm.p_total_ahorro),
           p_estado: editForm.p_estado,
-          p_modificado_por: editForm.autor.trim(),
+          p_modificado_por: session.dni.value,
         }),
       { successMessage: 'Presupuesto actualizado exitosamente.' },
     )
@@ -322,11 +320,6 @@ async function confirmDelete() {
           <label>Total ahorro</label>
           <input v-model="createForm.p_total_ahorro" type="number" step="0.01" class="input" />
         </div>
-        <div class="field">
-          <label>Creado por</label>
-          <input v-model="createForm.autor" class="input" :class="{ invalid: createErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="createErrors.autor">{{ createErrors.autor }}</span>
-        </div>
       </form>
       <template #footer>
         <button type="button" class="btn btn-secondary" @click="showCreate = false">Cancelar</button>
@@ -384,11 +377,6 @@ async function confirmDelete() {
           <select v-model="editForm.p_estado" class="input">
             <option v-for="e in PRESUPUESTO_ESTADOS" :key="e" :value="e">{{ e }}</option>
           </select>
-        </div>
-        <div class="field span-2">
-          <label>Modificado por</label>
-          <input v-model="editForm.autor" class="input" :class="{ invalid: editErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="editErrors.autor">{{ editErrors.autor }}</span>
         </div>
       </form>
       <template #footer>

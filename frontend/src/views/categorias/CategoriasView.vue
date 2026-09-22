@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { categoriaService, CATEGORIA_TIPOS } from '@/services/categoriaService'
 import { useCrud } from '@/composables/useCrud'
+import { useSession } from '@/services/session'
 import AppModal from '@/components/AppModal.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -9,6 +10,7 @@ import StatusBadge from '@/components/StatusBadge.vue'
 import EmptyState from '@/components/EmptyState.vue'
 
 const { items: categorias, loading, error, run } = useCrud()
+const session = useSession()
 const search = ref('')
 
 const filtered = computed(() => {
@@ -31,7 +33,6 @@ const emptyForm = () => ({
   p_icono_nombre: '',
   p_color_hex: '#4f46e5',
   p_orden: '',
-  autor: '',
 })
 
 const showForm = ref(false)
@@ -57,7 +58,6 @@ function openEdit(c) {
     p_icono_nombre: c.icono_nombre || '',
     p_color_hex: c.color_hex || '#4f46e5',
     p_orden: c.orden ?? '',
-    autor: '',
   })
   clearErrors()
   showForm.value = true
@@ -71,7 +71,6 @@ function validate() {
   clearErrors()
   if (!form.p_nombre.trim()) formErrors.p_nombre = 'El nombre es obligatorio.'
   if (formMode.value === 'create' && !form.p_tipo) formErrors.p_tipo = 'Selecciona un tipo.'
-  if (!form.autor.trim()) formErrors.autor = 'Indica quién realiza el cambio.'
   return Object.keys(formErrors).length === 0
 }
 
@@ -89,7 +88,7 @@ async function submitForm() {
             p_icono_nombre: form.p_icono_nombre.trim() || null,
             p_color_hex: form.p_color_hex || null,
             p_orden: form.p_orden === '' ? null : Number(form.p_orden),
-            p_creado_por: form.autor.trim(),
+            p_creado_por: session.dni.value,
           }),
         { successMessage: 'Categoria creada exitosamente.' },
       )
@@ -99,7 +98,7 @@ async function submitForm() {
           categoriaService.actualizar(form.id, {
             p_nombre: form.p_nombre.trim(),
             p_descripcion: form.p_descripcion.trim() || null,
-            p_modificado_por: form.autor.trim(),
+            p_modificado_por: session.dni.value,
           }),
         { successMessage: 'Categoria actualizada exitosamente.' },
       )
@@ -236,12 +235,6 @@ async function confirmDelete() {
         <div class="field">
           <label>Color <span class="optional">(opcional)</span></label>
           <input v-model="form.p_color_hex" type="color" class="input" style="height: 34px; padding: 3px" :disabled="formMode === 'edit'" />
-        </div>
-
-        <div class="field span-2">
-          <label>{{ formMode === 'create' ? 'Creado por' : 'Modificado por' }}</label>
-          <input v-model="form.autor" class="input" :class="{ invalid: formErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="formErrors.autor">{{ formErrors.autor }}</span>
         </div>
       </form>
 

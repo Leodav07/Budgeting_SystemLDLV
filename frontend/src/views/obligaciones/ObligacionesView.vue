@@ -3,6 +3,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { obligacionService } from '@/services/obligacionService'
 import { useCrud } from '@/composables/useCrud'
+import { useSession } from '@/services/session'
 import AppModal from '@/components/AppModal.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -13,6 +14,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { items: obligaciones, loading, error, run } = useCrud()
+const session = useSession()
 const dniInput = ref(route.query.usuario || '')
 const activeDni = ref(route.query.usuario || null)
 // El backend necesita un valor concreto (true/false) en `vigente` — ver la nota
@@ -63,7 +65,6 @@ const createForm = reactive({
   p_vence_dia: 1,
   p_fecha_inicio: '',
   p_fecha_final: '',
-  autor: '',
 })
 const createErrors = reactive({})
 const saving = ref(false)
@@ -78,7 +79,6 @@ function openCreate() {
     p_vence_dia: 1,
     p_fecha_inicio: new Date().toISOString().slice(0, 10),
     p_fecha_final: '',
-    autor: '',
   })
   Object.keys(createErrors).forEach((k) => delete createErrors[k])
   showCreate.value = true
@@ -91,7 +91,6 @@ function validateCreate() {
   if (!createForm.p_nombre.trim()) createErrors.p_nombre = 'Obligatorio.'
   if (createForm.p_monto_fijo === '') createErrors.p_monto_fijo = 'Obligatorio.'
   if (!createForm.p_fecha_inicio) createErrors.p_fecha_inicio = 'Obligatorio.'
-  if (!createForm.autor.trim()) createErrors.autor = 'Indica quién lo crea.'
   return Object.keys(createErrors).length === 0
 }
 
@@ -110,7 +109,7 @@ async function submitCreate() {
           p_vence_dia: Number(createForm.p_vence_dia),
           p_fecha_inicio: createForm.p_fecha_inicio,
           p_fecha_final: createForm.p_fecha_final || null,
-          p_creado_por: createForm.autor.trim(),
+          p_creado_por: session.dni.value,
         }),
       { successMessage: 'Obligacion creada exitosamente.' },
     )
@@ -160,7 +159,6 @@ function openEdit() {
     p_vence_dia: lookupResult.value.vence_dia,
     p_fecha_inicio: lookupResult.value.fecha_incio,
     p_fecha_final: lookupResult.value.fecha_final || '',
-    autor: '',
   })
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   showEdit.value = true
@@ -169,7 +167,6 @@ function openEdit() {
 function validateEdit() {
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   if (!editForm.p_nombre?.trim()) editErrors.p_nombre = 'Obligatorio.'
-  if (!editForm.autor?.trim()) editErrors.autor = 'Indica quién lo modifica.'
   return Object.keys(editErrors).length === 0
 }
 
@@ -188,7 +185,7 @@ async function submitEdit() {
           p_vence_dia: Number(editForm.p_vence_dia),
           p_fecha_inicio: editForm.p_fecha_inicio,
           p_fecha_final: editForm.p_fecha_final || null,
-          p_modificado_por: editForm.autor.trim(),
+          p_modificado_por: session.dni.value,
         }),
       { successMessage: 'Obligacion actualizada exitosamente.' },
     )
@@ -205,10 +202,10 @@ async function submitEdit() {
 const confirmingDelete = ref(false)
 const deleting = ref(false)
 
-async function confirmDelete(autor) {
+async function confirmDelete() {
   deleting.value = true
   try {
-    await run(() => obligacionService.eliminar(lookupId.value, { p_modificado_por: autor }), {
+    await run(() => obligacionService.eliminar(lookupId.value, { p_modificado_por: session.dni.value }), {
       successMessage: 'Obligacion eliminada correctamente.',
     })
     confirmingDelete.value = false
@@ -367,11 +364,6 @@ async function confirmDelete(autor) {
           <input v-model="createForm.p_fecha_final" type="date" class="input" />
         </div>
 
-        <div class="field span-2">
-          <label>Creado por</label>
-          <input v-model="createForm.autor" class="input" :class="{ invalid: createErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="createErrors.autor">{{ createErrors.autor }}</span>
-        </div>
       </form>
       <template #footer>
         <button type="button" class="btn btn-secondary" @click="showCreate = false">Cancelar</button>
@@ -417,11 +409,6 @@ async function confirmDelete(autor) {
           <label>Fecha final <span class="optional">(opcional)</span></label>
           <input v-model="editForm.p_fecha_final" type="date" class="input" />
         </div>
-        <div class="field span-2">
-          <label>Modificado por</label>
-          <input v-model="editForm.autor" class="input" :class="{ invalid: editErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="editErrors.autor">{{ editErrors.autor }}</span>
-        </div>
       </form>
       <template #footer>
         <button type="button" class="btn btn-secondary" @click="showEdit = false">Cancelar</button>
@@ -436,8 +423,6 @@ async function confirmDelete(autor) {
       title="Dar de baja obligación"
       :message="`Se dará de baja la obligación #${lookupId}.`"
       confirm-label="Dar de baja"
-      require-input
-      input-label="Modificado por"
       :loading="deleting"
       @confirm="confirmDelete"
       @cancel="confirmingDelete = false"

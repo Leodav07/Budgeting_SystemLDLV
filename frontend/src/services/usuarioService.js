@@ -15,7 +15,7 @@ export const usuarioService = {
   },
 
   crear(payload) {
-    // payload: { dni, p_nombre, s_nombre, p_apellido, s_apellido, correo_elec, psalario, pcreado_por }
+    // payload: { dni, p_nombre, s_nombre, p_apellido, s_apellido, correo_elec, psalario, pcreado_por, p_contrasenia }
     return request(http.post('/api/usuarios', payload))
   },
 

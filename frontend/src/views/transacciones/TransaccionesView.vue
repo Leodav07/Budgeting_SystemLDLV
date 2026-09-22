@@ -3,6 +3,7 @@ import { onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { transaccionService, TRANSACCION_TIPOS, METODOS_PAGO } from '@/services/transaccionService'
 import { useCrud } from '@/composables/useCrud'
+import { useSession } from '@/services/session'
 import AppModal from '@/components/AppModal.vue'
 import AppAlert from '@/components/AppAlert.vue'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
@@ -13,6 +14,7 @@ const route = useRoute()
 const router = useRouter()
 
 const { items: transacciones, loading, error, run } = useCrud()
+const session = useSession()
 const presupuestoInput = ref(route.query.presupuesto || '')
 const activePresupuestoId = ref(route.query.presupuesto || null)
 
@@ -66,7 +68,6 @@ const emptyCreate = () => ({
   p_metodo_pago: 'efectivo',
   p_num_factura: '',
   p_observaciones: '',
-  autor: '',
 })
 
 const showCreate = ref(false)
@@ -86,7 +87,6 @@ function validateCreate() {
   if (!createForm.p_id_subcategoria) createErrors.p_id_subcategoria = 'Obligatorio.'
   if (createForm.p_monto === '') createErrors.p_monto = 'Obligatorio.'
   if (!createForm.p_fecha_ocurrido) createErrors.p_fecha_ocurrido = 'Obligatorio.'
-  if (!createForm.autor.trim()) createErrors.autor = 'Indica quién lo crea.'
   return Object.keys(createErrors).length === 0
 }
 
@@ -109,7 +109,7 @@ async function submitCreate() {
           p_metodo_pago: createForm.p_metodo_pago,
           p_num_factura: createForm.p_num_factura.trim() || null,
           p_observaciones: createForm.p_observaciones.trim() || null,
-          p_creado_por: createForm.autor.trim(),
+          p_creado_por: session.dni.value,
         }),
       { successMessage: 'Transaccion creada exitosamente.' },
     )
@@ -162,7 +162,6 @@ function openEdit() {
     p_metodo_pago: lookupResult.value.metodo_pago,
     p_num_factura: lookupResult.value.num_factura || '',
     p_observaciones: lookupResult.value.observaciones || '',
-    autor: '',
   })
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   showEdit.value = true
@@ -171,7 +170,6 @@ function openEdit() {
 function validateEdit() {
   Object.keys(editErrors).forEach((k) => delete editErrors[k])
   if (editForm.p_monto === '') editErrors.p_monto = 'Obligatorio.'
-  if (!editForm.autor?.trim()) editErrors.autor = 'Indica quién lo modifica.'
   return Object.keys(editErrors).length === 0
 }
 
@@ -194,7 +192,7 @@ async function submitEdit() {
           p_num_factura: editForm.p_num_factura?.trim() || null,
           p_observaciones: editForm.p_observaciones?.trim() || null,
           // ActualizarTransaccionRequest usa "p_creado_por" también para el update.
-          p_creado_por: editForm.autor.trim(),
+          p_creado_por: session.dni.value,
         }),
       { successMessage: 'Transaccion actualizada exitosamente.' },
     )
@@ -378,11 +376,6 @@ async function confirmDelete() {
           <input v-model="createForm.p_observaciones" class="input" maxlength="255" />
         </div>
 
-        <div class="field span-2">
-          <label>Creado por</label>
-          <input v-model="createForm.autor" class="input" :class="{ invalid: createErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="createErrors.autor">{{ createErrors.autor }}</span>
-        </div>
       </form>
       <template #footer>
         <button type="button" class="btn btn-secondary" @click="showCreate = false">Cancelar</button>
@@ -443,11 +436,6 @@ async function confirmDelete() {
         <div class="field">
           <label>Observaciones <span class="optional">(opcional)</span></label>
           <input v-model="editForm.p_observaciones" class="input" maxlength="255" />
-        </div>
-        <div class="field span-2">
-          <label>Modificado por</label>
-          <input v-model="editForm.autor" class="input" :class="{ invalid: editErrors.autor }" maxlength="100" />
-          <span class="field-error" v-if="editErrors.autor">{{ editErrors.autor }}</span>
         </div>
       </form>
       <template #footer>
