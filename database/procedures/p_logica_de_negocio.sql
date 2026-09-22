@@ -121,8 +121,8 @@ CREATE PROCEDURE sp_procesar_obligaciones_mes(IN p_dni_usuario VARCHAR(18),
 BEGIN
 	
 	SELECT * FROM obligaciones_fijas WHERE
-    usuario_dni = p_dni_usuario AND vigente = 1 AND fecha_inicio <= LAST_DAY(CURDATE()) AND 
-    fecha_final IS NULL OR fecha_final >= STR_TO_DATE(CONCAT(p_anio,'-',p_mes,'-01'), '%Y-%m-%d');
+    usuario_dni = p_dni_usuario AND vigente = 1 AND fecha_inicio <= LAST_DAY(STR_TO_DATE(CONCAT(p_anio, '-', p_mes, '-01'), '%Y-%m-%d')) AND 
+    (fecha_final IS NULL OR fecha_final >= STR_TO_DATE(CONCAT(p_anio,'-',p_mes,'-01'), '%Y-%m-%d'));
 	
 END $$
 
@@ -140,9 +140,6 @@ CREATE PROCEDURE sp_cerrar_presupuesto(IN p_id_presupuesto INT,
 										IN p_modificado_por VARCHAR(100))
 BEGIN
 	
-	SELECT * FROM obligaciones_fijas WHERE
-    usuario_dni = p_dni_usuario AND vigente = 1 AND fecha_inicio <= LAST_DAY(CURDATE()) AND 
-    fecha_final IS NULL OR fecha_final >= STR_TO_DATE(CONCAT(p_anio,'-',p_mes,'-01'), '%Y-%m-%d');
 	
 END $$
 
