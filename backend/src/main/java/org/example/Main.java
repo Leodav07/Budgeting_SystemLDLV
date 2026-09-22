@@ -1,6 +1,7 @@
 package org.example;
 
 import io.javalin.Javalin;
+import org.example.controller.ReporteController;
 import org.example.exception.ApiExceptionController;
 import routes.*;
 import io.javalin.json.JavalinJackson;
@@ -27,6 +28,7 @@ public class Main {
         ObligacionRoutes.registrar(app);
         TransaccionRoutes.registrar(app);
         PresupuestoDetalleRoutes.registrar(app);
+        ReporteRoutes.registrar(app);
 
         app.exception(ApiExceptionController.class, (err, ctx) ->{
                 ctx.status(err.getStatus()).json(Map.of(

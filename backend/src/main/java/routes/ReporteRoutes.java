@@ -1,0 +1,13 @@
+package routes;
+
+import io.javalin.Javalin;
+import org.example.controller.PresupuestoController;
+import org.example.controller.ReporteController;
+
+public class ReporteRoutes {
+    public static void registrar(Javalin app) {
+        ReporteController reporteController = new ReporteController();
+
+        app.get("/api/reporteria/reporte1", reporteController::reporteIngresosGastos);
+    }
+}
