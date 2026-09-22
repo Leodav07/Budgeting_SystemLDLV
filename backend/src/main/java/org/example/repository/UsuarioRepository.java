@@ -1,6 +1,7 @@
 package org.example.repository;
 
 import org.example.config.DBConnection;
+import org.example.config.PasswordAuthentication;
 import org.example.dto.usuario.ActualizarUsuarioRequest;
 import org.example.dto.usuario.CrearUsuarioRequest;
 import org.example.dto.usuario.EliminarUsuarioRequest;
@@ -19,7 +20,9 @@ public class UsuarioRepository {
     public void CrearUsuario(CrearUsuarioRequest usuariorq) throws SQLException {
         try(Connection connection = dbConnection.getConnection();
             CallableStatement statement =
-                    connection.prepareCall("{CALL sp_insertar_usuario(?,?,?,?,?,?,?,?)}")){
+                    connection.prepareCall("{CALL sp_insertar_usuario(?,?,?,?,?,?,?,?,?)}")){
+
+            PasswordAuthentication pAuth = new PasswordAuthentication();
 
             statement.setString(1, usuariorq.dni());
             statement.setString(2,usuariorq.p_nombre());
@@ -43,6 +46,12 @@ public class UsuarioRepository {
             statement.setString(6, usuariorq.correo_elec());
             statement.setBigDecimal(7, usuariorq.psalario());
             statement.setString(8, usuariorq.pcreado_por());
+
+            if(usuariorq.p_contrasenia() == null){
+                statement.setNull(9, Types.VARCHAR);
+            }else{
+                statement.setString(9, pAuth.hash(usuariorq.p_contrasenia().toCharArray()));
+            }
 
             statement.execute();
         }catch(SQLException err){

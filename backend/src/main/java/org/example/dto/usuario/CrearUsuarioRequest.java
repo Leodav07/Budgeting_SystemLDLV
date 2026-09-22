@@ -10,6 +10,7 @@ public record CrearUsuarioRequest (
         String s_apellido,
         String correo_elec,
         BigDecimal psalario,
-        String pcreado_por
+        String pcreado_por,
+        String p_contrasenia
 ){
 }
