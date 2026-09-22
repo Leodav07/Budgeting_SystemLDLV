@@ -43,6 +43,12 @@ CREATE PROCEDURE sp_reporte2(IN dni VARCHAR(18),
                             IN p_mes TINYINT
                             )
 BEGIN
+
+
+	IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
+    END IF;
+    
 	WITH t1 AS (
     SELECT c.nombre AS nombre_categoria, SUM(COALESCE(t.monto, 0)) AS monto_total,
     COUNT(*) AS conteo_transacciones 
@@ -76,9 +82,13 @@ CREATE PROCEDURE sp_reporte3(IN dni VARCHAR(18),
                             IN p_id_presupuesto INT
                             )
 BEGIN
+
+	IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
+    END IF;
 	
     WITH t1 AS (
-		SELECT pd.id_presupuesto, pd.id_subcategoria, sc.nombre AS nombre_subcategoria, pd.monto_asignado AS monto_presupuestado,
+		SELECT pd.id_presupuesto, pd.id_subcategoria, sc.nombre AS nombre_subcategoria, ANY_VALUE(pd.monto_asignado) AS monto_presupuestado,
         c.id_categoria, c.nombre as nombre_categoria, SUM(COALESCE(t.monto,0)) AS monto_gastado
         FROM presupuestos_detalles pd 
         INNER JOIN subcategorias sc ON pd.id_subcategoria = sc.id_subcategoria
@@ -86,7 +96,7 @@ BEGIN
         LEFT JOIN transacciones t ON sc.id_subcategoria = t.id_subcategoria AND t.anio = p_anio AND t.mes = p_mes
         INNER JOIN presupuestos p ON pd.id_presupuesto = p.id_presupuesto
         WHERE p.usuario_dni = dni AND c.tipo = p_tipo AND pd.id_presupuesto = p_id_presupuesto
-        GROUP BY sc.id_subcategoria, pd.id_presupuesto, pd.monto_asignado, c.id_categoria, c.nombre
+        GROUP BY sc.id_subcategoria, pd.id_presupuesto, c.id_categoria, c.nombre
     )
     
 	SELECT t1.*, SUM(t1.monto_presupuestado) OVER (PARTITION BY t1.id_categoria) AS total_categoria FROM t1;

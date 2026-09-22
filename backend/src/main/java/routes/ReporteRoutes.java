@@ -9,5 +9,9 @@ public class ReporteRoutes {
         ReporteController reporteController = new ReporteController();
 
         app.get("/api/reporteria/reporte1", reporteController::reporteIngresosGastos);
+        app.get("/api/reporteria/reporte2", reporteController::reporteDistribucionGastos);
+        app.get("/api/reporteria/reporte3", reporteController::reporteAnalisis);
+
+
     }
 }
