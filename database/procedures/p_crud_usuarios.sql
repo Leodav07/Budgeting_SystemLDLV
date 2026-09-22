@@ -4,30 +4,43 @@ DROP PROCEDURE IF EXISTS sp_insertar_usuario;
 
 DELIMITER $$
 
-CREATE PROCEDURE sp_insertar_usuario(IN dni VARCHAR(18),
+CREATE PROCEDURE sp_insertar_usuario(
+									IN dni VARCHAR(18),
 									IN p_nombre VARCHAR(20),
 									IN s_nombre VARCHAR(20),
 									IN p_apellido VARCHAR(20),
 									IN s_apellido VARCHAR(20),
-                                    IN correo_elec VARCHAR(50),
-                                    IN psalario DECIMAL(8,2),
+									IN correo_elec VARCHAR(50),
+									IN psalario DECIMAL(8,2),
 									IN pcreado_por VARCHAR(100),
-                                    IN p_contrasenia VARCHAR(255))
+									IN p_contrasenia VARCHAR(255)
+																)
 BEGIN
-	IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
-	END IF;
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL; 
+    END;
+
+    IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
+    END IF;
     
-	INSERT INTO usuarios (usuario_dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
-						  email, salario, creado_por)
-    VALUES (dni, p_nombre, s_nombre, p_apellido, s_apellido, correo_elec, psalario, pcreado_por);
+    START TRANSACTION;
     
-    INSERT INTO table_login_usuario (usuario_dni, contrasenia)
-    VALUES (dni, p_contrasenia);
+        INSERT INTO usuarios (usuario_dni, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido,
+                              email, salario, creado_por)
+        VALUES (dni, p_nombre, s_nombre, p_apellido, s_apellido, correo_elec, psalario, pcreado_por);
+        
+        INSERT INTO table_login_usuario (usuario_dni, contrasenia, creado_por)
+        VALUES (dni, p_contrasenia, pcreado_por);
+        
+    COMMIT;
     
 END $$
 
 DELIMITER ;
+
 
 -- 2. actualizar usuario
 

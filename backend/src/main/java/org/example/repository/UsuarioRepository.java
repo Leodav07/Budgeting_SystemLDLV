@@ -1,7 +1,7 @@
 package org.example.repository;
 
 import org.example.config.DBConnection;
-import org.example.config.PasswordAuthentication;
+import org.example.config.login.PasswordAuthentication;
 import org.example.dto.usuario.ActualizarUsuarioRequest;
 import org.example.dto.usuario.CrearUsuarioRequest;
 import org.example.dto.usuario.EliminarUsuarioRequest;
@@ -47,11 +47,8 @@ public class UsuarioRepository {
             statement.setBigDecimal(7, usuariorq.psalario());
             statement.setString(8, usuariorq.pcreado_por());
 
-            if(usuariorq.p_contrasenia() == null){
-                statement.setNull(9, Types.VARCHAR);
-            }else{
-                statement.setString(9, pAuth.hash(usuariorq.p_contrasenia().toCharArray()));
-            }
+            statement.setString(9, pAuth.hash(usuariorq.p_contrasenia().toCharArray()));
+
 
             statement.execute();
         }catch(SQLException err){

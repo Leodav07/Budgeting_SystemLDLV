@@ -1,7 +1,7 @@
 // Source - https://stackoverflow.com/a/2861125
 // Posted by erickson, modified by community. See post 'Timeline' for change history
 // Retrieved 2026-09-21, License - CC BY-SA 4.0
-package org.example.config;
+package org.example.config.login;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;

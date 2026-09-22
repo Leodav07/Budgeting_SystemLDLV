@@ -19,7 +19,7 @@ public class Main {
                 mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
             }));
         });
-
+        LoginRoute.registrar(app);
         UsuarioRoutes.registrar(app);
         CategoriaRoutes.registrar(app);
         PresupuestoRoutes.registrar(app);
