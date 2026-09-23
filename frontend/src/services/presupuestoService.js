@@ -9,12 +9,6 @@ import { http, request } from './http'
  * `estado` es opcional: si no se manda, el SP `sp_listar_presupuestos_usuario`
  * ya maneja `p_estado IS NULL` como "sin filtro" (a diferencia del de
  * Obligaciones, este sí soporta "todas" sin problema).
- *
- * ⚠️ Al momento de escribir esto, `PresupuestoController.listarPresupuestos`
- * todavía lee `ctx.pathParam("estado")` en vez de `ctx.queryParam("estado")` —
- * esa línea sigue rota (la ruta solo declara `{id}}`, no `{estado}`) y esta
- * llamada va a fallar hasta que se corrija. El resto del contrato (ruta, DTO)
- * ya está bien.
  */
 export const PRESUPUESTO_ESTADOS = ['activo', 'cerrado', 'borrador']
 
@@ -42,5 +36,14 @@ export const presupuestoService = {
 
   eliminar(id) {
     return request(http.patch(`/api/presupuestos/${id}`))
+  },
+
+  crearCompleto(payload) {
+    // payload: { p_usuario_dni, p_nombre, p_descripcion, p_periodo_inicio, p_periodo_fin,
+    //            p_lista_subcategorias_json: [{ id_subcategoria, monto_mensual }, ...],
+    //            p_creado_por }
+    // Espejo de sp_crear_presupuesto_completo: crea el presupuesto y todos sus detalles
+    // por subcategoría en una sola transacción atómica.
+    return request(http.post('/api/presupuestos/completo', payload))
   },
 }

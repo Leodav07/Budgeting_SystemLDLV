@@ -257,8 +257,7 @@ async function confirmDelete() {
         </div>
 
         <p class="hint" style="margin-top: 10px">
-          Este listado no trae <code>id_pdetalle</code> (revisa <code>ListarPresupuestoDetalle.java</code>), así que edición/baja
-          se hacen por ID en la herramienta de abajo.
+          Para editar o eliminar un detalle, búscalo por su ID en la herramienta de abajo.
         </p>
       </template>
     </div>

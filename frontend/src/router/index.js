@@ -57,6 +57,36 @@ const router = createRouter({
           name: 'transacciones',
           component: () => import('../views/transacciones/TransaccionesView.vue'),
         },
+        {
+          path: 'procedimientos/registrar-transaccion',
+          name: 'procedimiento-transaccion-completa',
+          component: () => import('../views/procedimientos/RegistrarTransaccionCompletaView.vue'),
+        },
+        {
+          path: 'procedimientos/crear-presupuesto',
+          name: 'procedimiento-presupuesto-completo',
+          component: () => import('../views/procedimientos/CrearPresupuestoCompletoView.vue'),
+        },
+        {
+          path: 'reportes/ingresos-gastos',
+          name: 'reporte-ingresos-gastos',
+          component: () => import('../views/reportes/Reporte1View.vue'),
+        },
+        {
+          path: 'reportes/distribucion-gastos',
+          name: 'reporte-distribucion-gastos',
+          component: () => import('../views/reportes/Reporte2View.vue'),
+        },
+        {
+          path: 'reportes/cumplimiento-presupuesto',
+          name: 'reporte-cumplimiento-presupuesto',
+          component: () => import('../views/reportes/Reporte3View.vue'),
+        },
+        {
+          path: 'reportes/estado-obligaciones',
+          name: 'reporte-estado-obligaciones',
+          component: () => import('../views/reportes/Reporte4View.vue'),
+        },
       ],
     },
   ],

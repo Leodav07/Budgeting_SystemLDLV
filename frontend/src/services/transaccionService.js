@@ -43,4 +43,14 @@ export const transaccionService = {
   eliminar(id) {
     return request(http.delete(`/api/transacciones/${id}`))
   },
+
+  registrarCompleta(payload) {
+    // payload: { p_usuario_dni, p_id_presupuesto, p_anio, p_mes, p_id_subcategoria, p_tipo,
+    //            p_descripcion, p_monto, p_fecha, p_metodo_pago, p_num_factura,
+    //            p_observaciones, p_creado_por, p_id_obligacion }
+    // Espejo de sp_registrar_transaccion_completa: valida vigencia del presupuesto,
+    // que el tipo coincida con la categoría, y opcionalmente vincula la transacción
+    // a una obligación fija (p_id_obligacion puede ir null).
+    return request(http.post('/api/transacciones/completa', payload))
+  },
 }

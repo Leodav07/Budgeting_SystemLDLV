@@ -230,7 +230,7 @@ async function confirmDelete() {
     <div class="app-topbar">
       <div>
         <h2>Transacciones</h2>
-        <p>Movimientos dentro de un presupuesto. La baja es un DELETE HTTP real, sin body.</p>
+        <p>Registra y consulta los movimientos de ingreso, gasto y ahorro dentro de un presupuesto.</p>
       </div>
       <button class="btn btn-primary" :disabled="!activePresupuestoId" @click="openCreate">+ Nueva transacción</button>
     </div>
@@ -285,8 +285,7 @@ async function confirmDelete() {
       </div>
 
       <p class="hint" style="margin-top: 10px" v-if="activePresupuestoId">
-        Este listado no trae <code>id_transaccion</code> (revisa <code>TransaccionEspecial.java</code> y su mapeo SQL), así
-        que edición/baja se hacen por ID en la herramienta de abajo.
+        Para editar o eliminar una transacción, búscala por su ID en la herramienta de abajo.
       </p>
     </div>
 

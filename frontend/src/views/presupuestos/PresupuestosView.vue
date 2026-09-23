@@ -202,7 +202,7 @@ async function confirmDelete() {
     <div class="app-topbar">
       <div>
         <h2>Presupuestos</h2>
-        <p>CRUD sobre <code>PresupuestoController</code>. La baja es lógica (PATCH, sin body).</p>
+        <p>Define y administra los presupuestos mensuales de cada usuario.</p>
       </div>
       <button class="btn btn-primary" @click="openCreate">+ Nuevo presupuesto</button>
     </div>
@@ -310,7 +310,7 @@ async function confirmDelete() {
         <div class="field">
           <label>Total ingresos</label>
           <input v-model="createForm.p_total_ingresos" type="number" step="0.01" class="input" />
-          <span class="hint">Máx. ~999,999.99 (DECIMAL(8,2))</span>
+          <span class="hint">Monto máximo: 999,999.99</span>
         </div>
         <div class="field">
           <label>Total gastos</label>

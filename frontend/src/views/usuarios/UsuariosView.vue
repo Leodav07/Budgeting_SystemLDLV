@@ -163,7 +163,7 @@ function formatFecha(v) {
     <div class="app-topbar">
       <div>
         <h2>Usuarios</h2>
-        <p>CRUD sobre <code>UsuarioController</code> — identificados por DNI. La baja es lógica (PATCH).</p>
+        <p>Administra los usuarios del sistema, identificados por su DNI.</p>
       </div>
       <button class="btn btn-primary" @click="openCreate">+ Nuevo usuario</button>
     </div>
@@ -233,7 +233,7 @@ function formatFecha(v) {
     <AppModal
       v-if="showForm"
       :title="formMode === 'create' ? 'Nuevo usuario' : `Editar usuario ${form.dni}`"
-      subtitle="Los campos marcados son obligatorios según CrearUsuarioRequest / ActualizarUsuarioRequest."
+      subtitle="Completa los campos marcados como obligatorios."
       @close="showForm = false"
     >
       <form class="form-grid" @submit.prevent="submitForm">

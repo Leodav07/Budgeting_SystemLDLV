@@ -194,7 +194,7 @@ async function confirmDelete() {
     <div class="app-topbar">
       <div>
         <h2>Subcategorías</h2>
-        <p>El listado (<code>GET /api/categorias/{id}/subcategorias</code>) siempre requiere una categoría de contexto.</p>
+        <p>Selecciona una categoría para ver y administrar sus subcategorías.</p>
       </div>
       <button class="btn btn-primary" :disabled="!selectedCategoriaId" @click="openCreate">+ Nueva subcategoría</button>
     </div>
@@ -251,9 +251,7 @@ async function confirmDelete() {
       </div>
 
       <p class="hint" style="margin-top: 10px">
-        Este listado no trae <code>id_subcategoria</code> (revisa <code>CategoriaSubcategoria.java</code> y su mapper en
-        <code>SubcategoriaRepository</code>), por eso no hay acciones de editar/eliminar directamente en la fila. Usa la
-        herramienta de abajo si ya conoces el ID.
+        Para editar o eliminar una subcategoría, búscala por su ID en la herramienta de abajo.
       </p>
     </div>
 

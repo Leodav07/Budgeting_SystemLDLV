@@ -61,41 +61,6 @@
   --section-gap: 160px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-background: #0b1120;
-    --color-background-soft: var(--vt-c-black-soft);
-    --color-background-mute: var(--vt-c-black-mute);
-
-    --color-surface: #131b2e;
-    --color-surface-hover: #17203a;
-
-    --color-border: rgba(148, 163, 184, 0.16);
-    --color-border-hover: rgba(148, 163, 184, 0.28);
-
-    --color-heading: #f1f5f9;
-    --color-text: #cbd5e1;
-    --color-text-soft: #94a3b8;
-
-    --color-primary: #818cf8;
-    --color-primary-hover: #a5b4fc;
-    --color-primary-soft: rgba(129, 140, 248, 0.14);
-
-    --color-success: #34d399;
-    --color-success-soft: rgba(52, 211, 153, 0.12);
-    --color-danger: #f87171;
-    --color-danger-soft: rgba(248, 113, 113, 0.12);
-    --color-warning: #fbbf24;
-    --color-warning-soft: rgba(251, 191, 36, 0.12);
-    --color-info: #38bdf8;
-    --color-info-soft: rgba(56, 189, 248, 0.12);
-
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
-    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
-  }
-}
-
 *,
 *::before,
 *::after {
@@ -105,7 +70,7 @@
 }
 
 html {
-  color-scheme: light dark;
+  color-scheme: light;
 }
 
 body {

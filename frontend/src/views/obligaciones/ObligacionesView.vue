@@ -246,10 +246,6 @@ async function confirmDelete() {
           </select>
         </div>
       </div>
-      <p class="hint" style="margin-top: -6px; margin-bottom: 12px" v-if="activeDni">
-        El filtro de vigencia ahora viaja como <code>?vigente=...</code> y lo resuelve el backend. Por ahora no hay una
-        opción "todas": <code>ObligacionRepository.Listar</code> usa <code>setBoolean</code>, que no admite <code>null</code>.
-      </p>
 
       <div v-if="!activeDni" class="state-box">
         <div class="state-icon">📌</div>
@@ -289,8 +285,7 @@ async function confirmDelete() {
       </div>
 
       <p class="hint" style="margin-top: 10px" v-if="activeDni">
-        Este listado no trae <code>id_obligacion</code> (revisa <code>ObligacionSubcategoria.java</code>), así que edición/baja
-        se hacen por ID en la herramienta de abajo.
+        Para editar o dar de baja una obligación, búscala por su ID en la herramienta de abajo.
       </p>
     </div>
 

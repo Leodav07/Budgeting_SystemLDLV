@@ -137,7 +137,7 @@ async function confirmDelete() {
     <div class="app-topbar">
       <div>
         <h2>Categorías</h2>
-        <p>CRUD sobre <code>CategoriaController</code>. El tipo, ícono, color y orden solo se definen al crear.</p>
+        <p>Clasifica tus ingresos, gastos y ahorros por categoría. El tipo, ícono, color y orden solo se definen al crear.</p>
       </div>
       <button class="btn btn-primary" @click="openCreate">+ Nueva categoría</button>
     </div>
