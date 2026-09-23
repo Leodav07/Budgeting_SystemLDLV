@@ -129,7 +129,8 @@ WITH t1 AS (
 	SELECT o.nombre AS nombre_obligacion, o.monto_fijo, o.vence_dia, o.id_obligacion, fn_dias_hasta_vencimiento(o.id_obligacion) AS dias_restantes,
     MAX(t.fecha_ocurrido) AS fecha_ultimo_pago
     FROM obligaciones_fijas o 
-    LEFT JOIN transacciones t ON t.id_obligacion = o.id_obligacion AND t.anio = p_anio AND t.mes = p_mes
+    LEFT JOIN obligaciones_transaccion ot ON ot.id_obligacion = o.id_obligacion
+	LEFT JOIN transacciones t ON t.id_transaccion = ot.id_transaccion AND t.anio = p_anio AND t.mes = p_mes
     WHERE o.usuario_dni = dni AND o.vigente = 1 AND o.fecha_inicio <= LAST_DAY(STR_TO_DATE(CONCAT(p_anio, '-', p_mes, '-01'), '%Y-%m-%d')) AND 
     (fecha_final IS NULL OR o.fecha_final >= STR_TO_DATE(CONCAT(p_anio,'-',p_mes,'-01'), '%Y-%m-%d'))
     GROUP BY o.id_obligacion

@@ -188,10 +188,12 @@ CREATE PROCEDURE sp_registrar_transaccion_completa(IN p_usuario_dni VARCHAR(18),
                                                     IN p_metodo_pago VARCHAR(25),
                                                     IN p_num_factura VARCHAR(20),
                                                     IN p_observaciones VARCHAR(255),
-													IN p_creado_por VARCHAR(100))
+													IN p_creado_por VARCHAR(100),
+                                                    IN p_id_obligacion INT)
 BEGIN
 	DECLARE f_tipo VARCHAR(20);
     DECLARE f_id_categoria INT;
+    DECLARE v_id_transaccion INT;
     
     IF NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = p_usuario_dni) THEN
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'USUARIO_NO_EXISTE';
@@ -217,8 +219,17 @@ BEGIN
 							num_factura, observaciones, creado_por)
 	VALUES (p_usuario_dni, p_id_presupuesto, p_anio, p_mes, p_id_subcategoria, p_tipo, p_descripcion, p_monto, p_fecha, p_metodo_pago, 
 			p_num_factura, p_observaciones, p_creado_por);
+            
+    SET v_id_transaccion = LAST_INSERT_ID();
+	IF p_id_obligacion IS NOT NULL THEN
     
-
+	IF NOT EXISTS(SELECT 1 FROM obligaciones WHERE id_obligacion = p_id_obligacion AND id_subcategoria = p_id_subcategoria) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'OBLIGACION_NO_EXISTE_O_SUBCATEGORIA_NO_COINCIDE';		
+    END IF;
+    
+    INSERT INTO obligaciones_transaccion (id_transaccion, id_obligacion, creado_por)
+    VALUES (v_id_transaccion, p_id_obligacion, p_creado_por);
+END IF;
 END $$
 
 DELIMITER ;
