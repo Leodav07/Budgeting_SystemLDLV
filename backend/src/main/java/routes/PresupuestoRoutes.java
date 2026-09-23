@@ -9,6 +9,7 @@ public class PresupuestoRoutes {
         PresupuestoController presupuestoController = new PresupuestoController();
 
         app.post("/api/presupuestos", presupuestoController::insertarPresupuesto);
+        app.post("/api/presupuestos/completo", presupuestoController::insertarPresupuestoCompleto);
         app.put("/api/presupuestos/{id}", presupuestoController::actualizarPresupuesto);
         app.patch("/api/presupuestos/{id}", presupuestoController::eliminarPresupuesto);
         app.get("/api/presupuestos/{id}", presupuestoController::consultarPresupuestos);

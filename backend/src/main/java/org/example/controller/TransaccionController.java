@@ -3,6 +3,7 @@ package org.example.controller;
 import io.javalin.http.Context;
 import org.example.dto.transaccion.ActualizarTransaccionRequest;
 import org.example.dto.transaccion.CrearTransaccionRequest;
+import org.example.dto.transaccion.RegistrarTransaccionCompletaRequest;
 import org.example.model.Especiales.TransaccionEspecial;
 import org.example.repository.TransaccionRepository;
 
@@ -19,6 +20,13 @@ public class TransaccionController {
         repository.CrearTransaccion(transaccionrq);
 
         ctx.status(201).json(Map.of("mensaje", "Transaccion creada exitosamente."));
+    }
+
+    public void registrarTransaccionCompleta(Context ctx) throws SQLException {
+        RegistrarTransaccionCompletaRequest transaccionrq = ctx.bodyAsClass(RegistrarTransaccionCompletaRequest.class);
+        repository.RegistrarTransaccionCompleta(transaccionrq);
+
+        ctx.status(201).json(Map.of("mensaje", "Transaccion registrada exitosamente."));
     }
 
     public void actualizarTransaccion(Context ctx) throws SQLException {

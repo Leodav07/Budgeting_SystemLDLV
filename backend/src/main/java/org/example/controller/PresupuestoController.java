@@ -2,6 +2,7 @@ package org.example.controller;
 
 import io.javalin.http.Context;
 import org.example.dto.presupuesto.ActualizarPresupuestoRequest;
+import org.example.dto.presupuesto.CrearPresupuestoCompletoRequest;
 import org.example.dto.presupuesto.CrearPresupuestoRequest;
 import org.example.model.Presupuesto;
 import org.example.repository.PresupuestoRepository;
@@ -17,6 +18,13 @@ public class PresupuestoController {
     public void insertarPresupuesto(Context ctx) throws SQLException {
         CrearPresupuestoRequest presupuestorq = ctx.bodyAsClass(CrearPresupuestoRequest.class);
         repository.CrearPresupuesto(presupuestorq);
+
+        ctx.status(201).json(Map.of("mensaje", "Presupuesto creado exitosamente."));
+    }
+
+    public void insertarPresupuestoCompleto(Context ctx) throws SQLException {
+        CrearPresupuestoCompletoRequest presupuestorq = ctx.bodyAsClass(CrearPresupuestoCompletoRequest.class);
+        repository.CrearPresupuestoCompleto(presupuestorq);
 
         ctx.status(201).json(Map.of("mensaje", "Presupuesto creado exitosamente."));
     }

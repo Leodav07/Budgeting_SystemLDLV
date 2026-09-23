@@ -10,6 +10,7 @@ public class TransaccionRoutes {
         TransaccionController transaccionController = new TransaccionController();
 
         app.post("/api/transacciones", transaccionController::insertarTransaccion);
+        app.post("/api/transacciones/completa", transaccionController::registrarTransaccionCompleta);
         app.put("/api/transacciones/{id}", transaccionController::actualizarTransaccion);
         app.delete("/api/transacciones/{id}", transaccionController::eliminarTransaccion);
         app.get("/api/transacciones/{id}", transaccionController::consultarTransaccion);

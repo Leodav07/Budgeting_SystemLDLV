@@ -211,6 +211,13 @@ BEGIN
     
     SELECT tipo INTO f_tipo FROM categorias WHERE id_categoria = f_id_categoria;
     
+IF p_id_obligacion IS NOT NULL THEN
+    
+	IF NOT EXISTS(SELECT 1 FROM obligaciones_fijas WHERE id_obligacion = p_id_obligacion AND id_subcategoria = p_id_subcategoria) THEN
+		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'OBLIGACION_NO_EXISTE_O_SUBCATEGORIA_NO_COINCIDE';		
+    END IF;
+END IF;
+    
     IF p_tipo != f_tipo THEN
 		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'TIPO_TRANSACCION_INVALIDO';
 	END IF;
@@ -221,15 +228,12 @@ BEGIN
 			p_num_factura, p_observaciones, p_creado_por);
             
     SET v_id_transaccion = LAST_INSERT_ID();
-	IF p_id_obligacion IS NOT NULL THEN
-    
-	IF NOT EXISTS(SELECT 1 FROM obligaciones WHERE id_obligacion = p_id_obligacion AND id_subcategoria = p_id_subcategoria) THEN
-		SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'OBLIGACION_NO_EXISTE_O_SUBCATEGORIA_NO_COINCIDE';		
-    END IF;
-    
+
+    IF p_id_obligacion IS NOT NULL THEN
     INSERT INTO obligaciones_transaccion (id_transaccion, id_obligacion, creado_por)
     VALUES (v_id_transaccion, p_id_obligacion, p_creado_por);
-END IF;
+    END IF;
+
 END $$
 
 DELIMITER ;

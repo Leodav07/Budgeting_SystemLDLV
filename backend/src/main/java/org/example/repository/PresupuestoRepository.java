@@ -1,7 +1,10 @@
 package org.example.repository;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.example.config.DBConnection;
 import org.example.dto.presupuesto.ActualizarPresupuestoRequest;
+import org.example.dto.presupuesto.CrearPresupuestoCompletoRequest;
 import org.example.dto.presupuesto.CrearPresupuestoRequest;
 import org.example.exception.ApiExceptionController;
 import org.example.model.Presupuesto;
@@ -18,6 +21,7 @@ import java.util.List;
 public class PresupuestoRepository {
 
     private final DBConnection dbConnection = new DBConnection();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void CrearPresupuesto(CrearPresupuestoRequest presupuestorq) throws SQLException {
         try(Connection connection = dbConnection.getConnection();
@@ -48,6 +52,48 @@ public class PresupuestoRepository {
                         "El mes final no puede ser menor que el mes inicial.");
             } else if (err.getMessage().contains("TRASLAPACION")){
                 throw new ApiExceptionController(404, "TRASLAPACION",
+                        "Las fechas se traslapan con un presupuesto ya activo.");
+            }
+
+            throw err;
+        }
+    }
+
+
+    public void CrearPresupuestoCompleto(CrearPresupuestoCompletoRequest presupuestorq) throws SQLException {
+        try(Connection connection = dbConnection.getConnection();
+            CallableStatement statement =
+                    connection.prepareCall("{CALL sp_crear_presupuesto_completo(?,?,?,?,?,?,?)}")) {
+
+            statement.setString(1, presupuestorq.p_usuario_dni());
+            statement.setString(2, presupuestorq.p_nombre());
+            statement.setString(3, presupuestorq.p_descripcion());
+            statement.setDate(4, presupuestorq.p_periodo_inicio());
+            statement.setDate(5, presupuestorq.p_periodo_fin());
+            statement.setString(6, objectMapper.writeValueAsString(presupuestorq.p_lista_subcategorias_json()));
+            statement.setString(7, presupuestorq.p_creado_por());
+
+            statement.execute();
+
+        }catch(JsonProcessingException err){
+            throw new ApiExceptionController(400, "LISTA_SUBCATEGORIAS_INVALIDA",
+                    "No fue posible procesar la lista de subcategorias.");
+
+        }catch(SQLException err){
+            if  (err.getMessage().contains("USUARIO_NO_EXISTE")){
+                throw new ApiExceptionController(404, "USUARIO_NO_EXISTE",
+                        "El usuario ingresado no existe en el sistema.");
+
+            } else if (err.getMessage().contains("PERIODO_INVALIDO")){
+                throw new ApiExceptionController(404, "PERIODO_INVALIDO",
+                        "El periodo final no puede ser menor al periodo inicial.");
+
+            } else if (err.getMessage().contains("PRESUPUESTO_SIN_DETALLES")){
+                throw new ApiExceptionController(404, "PRESUPUESTO_SIN_DETALLES",
+                        "El presupuesto debe incluir al menos una subcategoria.");
+
+            } else if (err.getMessage().contains("PRESUPUESTO_ACTIVO_SOLAPADO")){
+                throw new ApiExceptionController(404, "PRESUPUESTO_ACTIVO_SOLAPADO",
                         "Las fechas se traslapan con un presupuesto ya activo.");
             }
 

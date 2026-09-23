@@ -4,12 +4,14 @@ import org.example.config.DBConnection;
 
 import org.example.dto.transaccion.ActualizarTransaccionRequest;
 import org.example.dto.transaccion.CrearTransaccionRequest;
+import org.example.dto.transaccion.RegistrarTransaccionCompletaRequest;
 import org.example.exception.ApiExceptionController;
 import org.example.model.Especiales.TransaccionEspecial;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,60 @@ public class TransaccionRepository {
             else if  (err.getMessage().contains("ANIO_Y_MES_NO_DENTRO_DE_VIGENCIA_PRESUPUESTO")){
                 throw new ApiExceptionController(404, "ANIO_Y_MES_NO_DENTRO_DE_VIGENCIA_PRESUPUESTO",
                         "El anio y el mes no estan dentro de la vigencia del presupuesto.");
+
+            }
+
+            throw err;
+        }
+    }
+
+
+    public void RegistrarTransaccionCompleta(RegistrarTransaccionCompletaRequest transaccionrq) throws SQLException {
+        try(Connection connection = dbConnection.getConnection();
+            CallableStatement statement =
+                    connection.prepareCall("{CALL sp_registrar_transaccion_completa(?,?,?,?,?,?,?,?,?,?,?,?,?,?)}")) {
+
+            statement.setString(1, transaccionrq.p_usuario_dni());
+            statement.setInt(2, transaccionrq.p_id_presupuesto());
+            statement.setInt(3, transaccionrq.p_anio());
+            statement.setInt(4, transaccionrq.p_mes());
+            statement.setInt(5, transaccionrq.p_id_subcategoria());
+            statement.setString(6, transaccionrq.p_tipo());
+            statement.setString(7, transaccionrq.p_descripcion());
+            statement.setBigDecimal(8, transaccionrq.p_monto());
+            statement.setDate(9, transaccionrq.p_fecha());
+            statement.setString(10, transaccionrq.p_metodo_pago());
+            statement.setString(11, transaccionrq.p_num_factura());
+            statement.setString(12, transaccionrq.p_observaciones());
+            statement.setString(13, transaccionrq.p_creado_por());
+            setNullableInt(statement, 14, transaccionrq.p_id_obligacion());
+
+            statement.execute();
+
+        }catch(SQLException err){
+            if  (err.getMessage().contains("USUARIO_NO_EXISTE")){
+                throw new ApiExceptionController(404, "USUARIO_NO_EXISTE",
+                        "El usuario ingresado no existe en el sistema.");
+
+            }
+            else if  (err.getMessage().contains("SUBCATEGORIA_NO_EXISTE")){
+                throw new ApiExceptionController(404, "SUBCATEGORIA_NO_EXISTE",
+                        "La subcategoria ingresada no existe en el sistema.");
+
+            }
+            else if  (err.getMessage().contains("TRANSACCION_FUERA_DE_VIGENCIA")){
+                throw new ApiExceptionController(404, "TRANSACCION_FUERA_DE_VIGENCIA",
+                        "El anio y el mes de la transaccion estan fuera de la vigencia del presupuesto.");
+
+            }
+            else if  (err.getMessage().contains("TIPO_TRANSACCION_INVALIDO")){
+                throw new ApiExceptionController(404, "TIPO_TRANSACCION_INVALIDO",
+                        "El tipo de transaccion no coincide con el tipo de la categoria.");
+
+            }
+            else if  (err.getMessage().contains("OBLIGACION_NO_EXISTE_O_SUBCATEGORIA_NO_COINCIDE")){
+                throw new ApiExceptionController(404, "OBLIGACION_NO_EXISTE_O_SUBCATEGORIA_NO_COINCIDE",
+                        "La obligacion no existe o su subcategoria no coincide con la de la transaccion.");
 
             }
 
@@ -167,6 +223,14 @@ public class TransaccionRepository {
         return transaccionEspeciales;
     }
 
+
+    private void setNullableInt(CallableStatement statement, int index, Integer value) throws SQLException {
+        if (value == null) {
+            statement.setNull(index, Types.INTEGER);
+        } else {
+            statement.setInt(index, value);
+        }
+    }
 
     private TransaccionEspecial mapearTransaccion(ResultSet result) throws SQLException {
         return new TransaccionEspecial(
