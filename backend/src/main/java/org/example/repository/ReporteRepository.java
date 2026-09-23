@@ -15,12 +15,15 @@ import org.example.model.Usuario;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ReporteRepository {
 
     private final DBConnection dbConnection = new DBConnection();
 
-    public ReporteIngresoGasto reporteria1(Reporte1Request reporterq) throws  SQLException{
+    public List<ReporteIngresoGasto> reporteria1(Reporte1Request reporterq) throws  SQLException{
+        List<ReporteIngresoGasto> reportesIngresos = new ArrayList<>();
         try (Connection connection = dbConnection.getConnection();
              CallableStatement statement =
                      connection.prepareCall("{CALL sp_reporte1(?,?,?,?,?)}")) {
@@ -32,8 +35,8 @@ public class ReporteRepository {
             statement.setInt(5, reporterq.p_mes_h());
 
             try (ResultSet resultado = statement.executeQuery()) {
-                if (resultado.next()) {
-                    return mapearReporte1(resultado);
+                while (resultado.next()) {
+                    reportesIngresos.add(mapearReporte1(resultado));
                 }
             }
         }catch(SQLException err){
@@ -45,7 +48,7 @@ public class ReporteRepository {
 
             throw err;
         }
-        return null;
+        return reportesIngresos;
 
     }
 
@@ -59,7 +62,8 @@ public class ReporteRepository {
         );
     }
 
-    public ReporteDistribucionGastos reporteria2(Reporte2Request reporterq) throws  SQLException{
+    public List<ReporteDistribucionGastos> reporteria2(Reporte2Request reporterq) throws  SQLException{
+        List<ReporteDistribucionGastos> reportesDistribucionesGastos = new ArrayList<>();
         try (Connection connection = dbConnection.getConnection();
              CallableStatement statement =
                      connection.prepareCall("{CALL sp_reporte2(?,?,?)}")) {
@@ -69,8 +73,8 @@ public class ReporteRepository {
             statement.setInt(3, reporterq.p_mes());
 
             try (ResultSet resultado = statement.executeQuery()) {
-                if (resultado.next()) {
-                    return mapearReport2(resultado);
+                while (resultado.next()) {
+                    reportesDistribucionesGastos.add(mapearReport2(resultado));
                 }
             }
         }catch(SQLException err){
@@ -82,7 +86,7 @@ public class ReporteRepository {
 
             throw err;
         }
-        return null;
+        return reportesDistribucionesGastos;
 
     }
 
@@ -97,7 +101,9 @@ public class ReporteRepository {
         );
     }
 
-    public ReporteAnalisis reporteria3(Reporte3Request reporterq) throws  SQLException{
+    public List<ReporteAnalisis> reporteria3(Reporte3Request reporterq) throws  SQLException{
+       List<ReporteAnalisis> reportesAnalisis = new ArrayList<>();
+
         try (Connection connection = dbConnection.getConnection();
              CallableStatement statement =
                      connection.prepareCall("{CALL sp_reporte3(?,?,?,?,?)}")) {
@@ -110,8 +116,8 @@ public class ReporteRepository {
 
 
             try (ResultSet resultado = statement.executeQuery()) {
-                if (resultado.next()) {
-                    return mapearReporte3(resultado);
+                while (resultado.next()) {
+                    reportesAnalisis.add(mapearReporte3(resultado));
                 }
             }
         }catch(SQLException err){
@@ -123,7 +129,7 @@ public class ReporteRepository {
 
             throw err;
         }
-        return null;
+        return reportesAnalisis;
 
     }
 
@@ -142,7 +148,10 @@ public class ReporteRepository {
         );
     }
 
-    public ReporteCumplimiento reporteria4(Reporte4Request reporterq) throws  SQLException{
+    public List<ReporteCumplimiento> reporteria4(Reporte4Request reporterq) throws  SQLException{
+
+        List<ReporteCumplimiento> reportesCumplimientos = new ArrayList<>();
+
         try (Connection connection = dbConnection.getConnection();
              CallableStatement statement =
                      connection.prepareCall("{CALL sp_reporte4(?,?,?)}")) {
@@ -153,8 +162,8 @@ public class ReporteRepository {
 
 
             try (ResultSet resultado = statement.executeQuery()) {
-                if (resultado.next()) {
-                    return mapearReporte4(resultado);
+                while (resultado.next()) {
+                    reportesCumplimientos.add(mapearReporte4(resultado));
                 }
             }
         }catch(SQLException err){
@@ -166,7 +175,7 @@ public class ReporteRepository {
 
             throw err;
         }
-        return null;
+        return reportesCumplimientos;
 
     }
 

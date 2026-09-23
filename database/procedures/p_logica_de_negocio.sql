@@ -38,8 +38,8 @@ BEGIN
     
     SET monto_ejecutado = fn_calcular_monto_ejecutado(p_id_subcategoria, p_anio, p_mes);
     
-	SELECT monto_asignado INTO monto_mensual_presupuestado FROM presupuestos_detalles WHERE f_id_presupuesto = id_presupuesto 
-    AND f_id_subcategoria = id_subcategoria;
+	SELECT monto_asignado INTO monto_mensual_presupuestado FROM presupuestos_detalles WHERE p_id_presupuesto = id_presupuesto 
+    AND p_id_subcategoria = id_subcategoria;
     
     SET p_porcentaje = (monto_ejecutado / monto_mensual_presupuestado) * 100;
     SET p_porcentaje = IFNULL(p_porcentaje, 0);
@@ -64,7 +64,7 @@ CREATE PROCEDURE sp_obtener_resumen_categoria_mes(IN p_id_categoria INT,
 BEGIN
 	SET p_monto_presupuestado = fn_obtener_total_categoria_mes(p_id_categoria, p_id_presupuesto, p_anio, p_mes);
     SET p_monto_ejecutado = fn_obtener_total_ejecutado_categoria_mes(p_id_categoria, p_anio, p_mes);
-    SET p_porcentaje = (p_monto_presupuestado/p_monto_ejecutado) * 100;
+    SET p_porcentaje = (p_monto_ejecutado/p_monto_presupuestado) * 100;
 	SET p_porcentaje = IFNULL(p_porcentaje, 0);
 
 END $$

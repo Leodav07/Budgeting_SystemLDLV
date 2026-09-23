@@ -135,7 +135,8 @@ WITH t1 AS (
     GROUP BY o.id_obligacion
 ),
 t2 AS (
-	  SELECT CASE WHEN fecha_ultimo_pago IS NOT NULL THEN 'Pagado'
+	  SELECT t1.*, 
+      CASE WHEN fecha_ultimo_pago IS NOT NULL THEN 'Pagado'
         WHEN dias_restantes < 0 THEN 'Vencido'
         ELSE 'Pendiente'
     END AS estado

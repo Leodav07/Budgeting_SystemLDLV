@@ -14,6 +14,7 @@ import org.example.model.Especiales.ReporteIngresoGasto;
 import org.example.repository.ReporteRepository;
 
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 public class ReporteController {
@@ -21,28 +22,14 @@ public class ReporteController {
 
     public void reporteIngresosGastos(Context ctx) throws SQLException {
         Reporte1Request reporterq = ctx.bodyAsClass(Reporte1Request.class);
-      ReporteIngresoGasto rpIngresosgastos =  reporteRepository.reporteria1(reporterq);
-
-        if(rpIngresosgastos == null){
-            ctx.status(404).json(Map.of(
-                    "mensaje", "Reporte 1 Fallido."
-            ));
-            return;
-        }
+      List<ReporteIngresoGasto> rpIngresosgastos =  reporteRepository.reporteria1(reporterq);
         ctx.json(rpIngresosgastos);
 
     }
 
     public void reporteDistribucionGastos(Context ctx) throws SQLException {
         Reporte2Request reporterq = ctx.bodyAsClass(Reporte2Request.class);
-        ReporteDistribucionGastos rpDistribucionGastos =  reporteRepository.reporteria2(reporterq);
-
-        if(rpDistribucionGastos == null){
-            ctx.status(404).json(Map.of(
-                    "mensaje", "Reporte 2 Fallido."
-            ));
-            return;
-        }
+        List<ReporteDistribucionGastos> rpDistribucionGastos =  reporteRepository.reporteria2(reporterq);
         ctx.json(rpDistribucionGastos);
 
 
@@ -50,27 +37,13 @@ public class ReporteController {
 
     public void reporteAnalisis(Context ctx) throws SQLException {
         Reporte3Request reporterq = ctx.bodyAsClass(Reporte3Request.class);
-        ReporteAnalisis rpAnalisis =  reporteRepository.reporteria3(reporterq);
-
-        if(rpAnalisis == null){
-            ctx.status(404).json(Map.of(
-                    "mensaje", "Reporte 3 Fallido."
-            ));
-            return;
-        }
+        List<ReporteAnalisis> rpAnalisis =  reporteRepository.reporteria3(reporterq);
         ctx.json(rpAnalisis);
     }
 
     public void reporteCumplimiento(Context ctx) throws SQLException {
         Reporte4Request reporterq = ctx.bodyAsClass(Reporte4Request.class);
-        ReporteCumplimiento rpCumplimiento =  reporteRepository.reporteria4(reporterq);
-
-        if(rpCumplimiento == null){
-            ctx.status(404).json(Map.of(
-                    "mensaje", "Reporte 4 Fallido."
-            ));
-            return;
-        }
+        List<ReporteCumplimiento> rpCumplimiento =  reporteRepository.reporteria4(reporterq);
         ctx.json(rpCumplimiento);
 
     }

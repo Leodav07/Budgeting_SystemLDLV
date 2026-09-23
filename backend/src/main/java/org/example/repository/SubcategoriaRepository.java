@@ -99,8 +99,8 @@ public class SubcategoriaRepository {
                 }
             }
         }catch(SQLException err){
-            if  (err.getMessage().contains("CATEGORIA_NO_EXISTE")){
-                throw new ApiExceptionController(404, "CATEGORIA_NO_EXISTE",
+            if  (err.getMessage().contains("SUBCATEGORIA_NO_EXISTE")){
+                throw new ApiExceptionController(404, "SUBCATEGORIA_NO_EXISTE",
                         "La categoria no existe en el sistema.");
 
             }

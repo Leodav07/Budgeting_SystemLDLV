@@ -8,10 +8,7 @@ import org.example.exception.ApiExceptionController;
 import org.example.model.Especiales.ObligacionSubcategoria;
 import org.example.model.Especiales.ObligacionesUsuarios;
 
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,7 +145,11 @@ public class ObligacionRepository {
         try (Connection connection = dbConnection.getConnection();
              CallableStatement statement = connection.prepareCall("{CALL sp_listar_obligaciones_usuario(?,?)}")){
             statement.setString(1, id);
+            if (vigente == null){
+                statement.setNull(2, Types.BOOLEAN);
+            }else{
             statement.setBoolean(2, vigente);
+            }
 
             try (ResultSet resultado = statement.executeQuery()) {
                 while (resultado.next()) {
