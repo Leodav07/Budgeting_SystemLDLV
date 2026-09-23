@@ -1,44 +1,31 @@
-# frontend
+# Frontend
 
-This template should help get you started developing with Vue 3 in Vite.
+Interfaz web hecha en Vue 3 (Composition API) + Vite. Consume la API del backend (`http://localhost:7070`) y no contiene lógica de negocio propia: solo muestra los datos y llama a los endpoints correspondientes.
 
-## Recommended IDE Setup
-
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
+## Cómo correr
 
 ```sh
 npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
 npm run dev
 ```
 
-### Compile and Minify for Production
+Esto levanta el servidor de desarrollo. El backend debe estar corriendo en paralelo para que la app funcione.
 
-```sh
-npm run build
-```
+## Estructura (`src/`)
 
-### Lint with [ESLint](https://eslint.org/)
+- **`views/`** — una pantalla por ruta, organizadas en 3 módulos (visibles en el menú lateral):
+  - **CRUDs**: `usuarios/`, `categorias/` (categorías y subcategorías), `presupuestos/` (presupuestos y sus detalles), `obligaciones/`, `transacciones/`. Cada una permite crear, ver, editar y eliminar/dar de baja registros.
+  - **Procedimientos**: `procedimientos/RegistrarTransaccionCompletaView.vue` y `CrearPresupuestoCompletoView.vue`, pantallas dedicadas a los dos procedimientos de negocio más complejos (registrar una transacción completa, crear un presupuesto con todos sus detalles de una vez).
+  - **Reportes**: `reportes/Reporte1View.vue` a `Reporte4View.vue` — ingresos vs. gastos, distribución de gastos por categoría, cumplimiento de presupuesto por categoría/subcategoría, y estado de las obligaciones fijas. Todos con gráficos (Chart.js) y exportación a PDF.
+  - `LoginView.vue` y `DashboardView.vue`.
+- **`layouts/AppShell.vue`** — estructura general de la app ya autenticada: menú lateral, cabecera y espacio para la sesión del usuario.
+- **`router/index.js`** — define todas las rutas y protege las que requieren sesión iniciada (redirige a `/login` si no hay sesión).
+- **`services/`** — funciones que llaman a la API del backend (una por entidad, más `session.js` para manejar el usuario logueado y `reporteService.js` para los reportes).
+- **`composables/useCrud.js`** — lógica común reutilizada por todas las pantallas de CRUD (cargar datos, manejar errores, mostrar mensajes de éxito).
+- **`utils/`** — `exportPdf.js` (genera el PDF de un reporte, incluyendo el gráfico) y `chartSetup.js` (configuración compartida de Chart.js).
+- **`components/`** — piezas reutilizables de UI: modal, alertas, confirmación de eliminar, badge de estado, estado vacío, etc.
+- **`stores/`** — estado global de la app (Pinia).
 
-```sh
-npm run lint
-```
+## Autenticación
+
+El login se hace con DNI y contraseña contra el endpoint del backend. Mientras la sesión está activa, se muestra el nombre del usuario en la esquina inferior izquierda del menú.
