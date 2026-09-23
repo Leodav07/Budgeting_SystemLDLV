@@ -223,4 +223,84 @@ END $$
 
 DELIMITER ;
 
+-- sp crear presupuesto completo
+DROP PROCEDURE IF EXISTS sp_crear_presupuesto_completo;
+
+DELIMITER $$
+
+CREATE PROCEDURE sp_crear_presupuesto_completo(IN p_usuario_dni VARCHAR(18), 
+                                               IN p_nombre VARCHAR(40),
+                                               IN p_descripcion VARCHAR(200),
+                                               IN p_periodo_inicio DATE,
+                                               IN p_periodo_fin DATE,
+                                               IN p_lista_subcategorias_json JSON,
+                                               IN p_creado_por VARCHAR(100))
+BEGIN
+    DECLARE v_id_generado INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    IF NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = p_usuario_dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'USUARIO_NO_EXISTE';
+    END IF;
+
+    IF p_periodo_fin < p_periodo_inicio THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PERIODO_INVALIDO';
+    END IF;
+
+    IF p_lista_subcategorias_json IS NULL OR JSON_LENGTH(p_lista_subcategorias_json) = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_SIN_DETALLES';
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM presupuestos 
+        WHERE usuario_dni = p_usuario_dni 
+          AND estado = 'activo'
+          AND (YEAR(p_periodo_inicio) * 100 + MONTH(p_periodo_inicio)) <= (anio_fin * 100 + mes_fin)
+          AND (YEAR(p_periodo_fin) * 100 + MONTH(p_periodo_fin)) >= (anio_inicio * 100 + mes_inicio)
+    ) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'PRESUPUESTO_ACTIVO_SOLAPADO';
+    END IF;
+
+    
+    START TRANSACTION;
+
+    INSERT INTO presupuestos (usuario_dni, nombre, descripcion, anio_inicio, mes_inicio, anio_fin, mes_fin, estado, creado_por)
+    VALUES (
+        p_usuario_dni, 
+        p_nombre, 
+        p_descripcion, 
+        YEAR(p_periodo_inicio), 
+        MONTH(p_periodo_inicio), 
+        YEAR(p_periodo_fin), 
+        MONTH(p_periodo_fin), 
+        'activo', 
+        p_creado_por
+    );
+
+    SET v_id_generado = LAST_INSERT_ID();
+
+    INSERT INTO presupuestos_detalles (id_presupuesto, id_subcategoria, monto_asignado, creado_por)
+    SELECT 
+        v_id_generado, 
+        jt.id_subcategoria, 
+        jt.monto_mensual, 
+        p_creado_por
+    FROM JSON_TABLE(
+        p_lista_subcategorias_json, '$[*]'
+        COLUMNS (
+            id_subcategoria INT PATH '$.id_subcategoria',
+            monto_mensual DECIMAL(8,2) PATH '$.monto_mensual'
+        )
+    ) AS jt;
+
+    COMMIT;
+
+END $$
+
+DELIMITER ;
 
