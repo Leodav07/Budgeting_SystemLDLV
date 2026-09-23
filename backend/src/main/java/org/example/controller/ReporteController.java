@@ -6,6 +6,7 @@ import org.example.dto.login.LoginRequest;
 import org.example.dto.reporteria.Reporte1Request;
 import org.example.dto.reporteria.Reporte2Request;
 import org.example.dto.reporteria.Reporte3Request;
+import org.example.dto.reporteria.Reporte4Request;
 import org.example.repository.ReporteRepository;
 
 import java.sql.SQLException;
@@ -31,6 +32,13 @@ public class ReporteController {
     public void reporteAnalisis(Context ctx) throws SQLException {
         Reporte3Request reporterq = ctx.bodyAsClass(Reporte3Request.class);
         reporteRepository.reporteria3(reporterq);
+        ctx.status(201).json(Map.of("mensaje", "Usuario."));
+
+    }
+
+    public void reporteCumplimiento(Context ctx) throws SQLException {
+        Reporte4Request reporterq = ctx.bodyAsClass(Reporte4Request.class);
+        reporteRepository.reporteria4(reporterq);
         ctx.status(201).json(Map.of("mensaje", "Usuario."));
 
     }

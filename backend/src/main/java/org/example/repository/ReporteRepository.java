@@ -4,17 +4,16 @@ import org.example.config.DBConnection;
 import org.example.dto.reporteria.Reporte1Request;
 import org.example.dto.reporteria.Reporte2Request;
 import org.example.dto.reporteria.Reporte3Request;
+import org.example.dto.reporteria.Reporte4Request;
 import org.example.exception.ApiExceptionController;
 import org.example.model.Especiales.ReporteAnalisis;
+import org.example.model.Especiales.ReporteCumplimiento;
 import org.example.model.Especiales.ReporteDistribucionGastos;
 import org.example.model.Especiales.ReporteIngresoGasto;
 import org.example.model.Usuario;
 
 import java.math.BigDecimal;
-import java.sql.CallableStatement;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDateTime;
 
 public class ReporteRepository {
@@ -139,6 +138,48 @@ public class ReporteRepository {
                 result.getString("nombre_categoria"),
                 result.getBigDecimal("monto_gastado")
 
+
+        );
+    }
+
+    public ReporteCumplimiento reporteria4(Reporte4Request reporterq) throws  SQLException{
+        try (Connection connection = dbConnection.getConnection();
+             CallableStatement statement =
+                     connection.prepareCall("{CALL sp_reporte4(?,?,?)}")) {
+
+            statement.setString(1, reporterq.dni());
+            statement.setInt(2, reporterq.p_anio());
+            statement.setInt(3, reporterq.p_mes());
+
+
+            try (ResultSet resultado = statement.executeQuery()) {
+                if (resultado.next()) {
+                    return mapearReporte4(resultado);
+                }
+            }
+        }catch(SQLException err){
+            if  (err.getMessage().contains("USUARIO_NO_EXISTE")){
+                throw new ApiExceptionController(404, "USUARIO_NO_EXISTE",
+                        "El usuario no existe en el sistema.");
+
+            }
+
+            throw err;
+        }
+        return null;
+
+    }
+
+
+    private ReporteCumplimiento mapearReporte4(ResultSet result) throws SQLException {
+        return new ReporteCumplimiento(
+                result.getString("nombre_obligacion"),
+                result.getBigDecimal("monto_fijo"),
+                result.getInt("vence_dia"),
+                result.getInt("id_obligacion"),
+                result.getInt("dias_restantes"),
+                (Date) result.getObject("fecha_ultimo_pago"),
+                result.getString("estado")
 
         );
     }

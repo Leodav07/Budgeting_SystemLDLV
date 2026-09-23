@@ -11,8 +11,8 @@ CREATE PROCEDURE sp_reporte1(IN dni VARCHAR(18),
                             IN p_mes_h TINYINT)
 BEGIN
 
-	IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
+	IF NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_NO_EXISTE";
     END IF;
     
 	WITH t1 AS(
@@ -45,8 +45,8 @@ CREATE PROCEDURE sp_reporte2(IN dni VARCHAR(18),
 BEGIN
 
 
-	IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
+	IF NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_NO_EXISTE";
     END IF;
     
 	WITH t1 AS (
@@ -83,8 +83,8 @@ CREATE PROCEDURE sp_reporte3(IN dni VARCHAR(18),
                             )
 BEGIN
 
-	IF EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
-        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_YA_EXISTE";
+	IF NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_NO_EXISTE";
     END IF;
 	
     WITH t1 AS (
@@ -120,6 +120,10 @@ CREATE PROCEDURE sp_reporte4(IN dni VARCHAR(18),
                             IN p_mes TINYINT
                             )
 BEGIN
+
+IF NOT EXISTS (SELECT 1 FROM usuarios WHERE usuario_dni = dni) THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = "USUARIO_NO_EXISTE";
+    END IF;
 
 WITH t1 AS (
 	SELECT o.nombre AS nombre_obligacion, o.monto_fijo, o.vence_dia, o.id_obligacion, fn_dias_hasta_vencimiento(o.id_obligacion) AS dias_restantes,
