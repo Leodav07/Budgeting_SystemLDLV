@@ -10,6 +10,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +27,10 @@ public class PresupuestoRepository {
             statement.setString(1, presupuestorq.p_usuario_dni());
             statement.setString(2, presupuestorq.p_nombre());
             statement.setString(3, presupuestorq.p_descripcion());
-            statement.setInt(4, presupuestorq.p_anio_inicio());
-            statement.setInt(5, presupuestorq.p_mes_inicio());
-            statement.setInt(6, presupuestorq.p_anio_final());
-            statement.setInt(7, presupuestorq.p_mes_final());
+            setNullableInt(statement, 4, presupuestorq.p_anio_inicio());
+            setNullableInt(statement, 5, presupuestorq.p_mes_inicio());
+            setNullableInt(statement, 6, presupuestorq.p_anio_final());
+            setNullableInt(statement, 7, presupuestorq.p_mes_final());
             statement.setBigDecimal(8, presupuestorq.p_total_ingresos());
             statement.setBigDecimal(9, presupuestorq.p_total_gastos());
             statement.setBigDecimal(10, presupuestorq.p_total_ahorro());
@@ -65,10 +66,10 @@ public class PresupuestoRepository {
             statement.setInt(2, id);
             statement.setString(3, presupuestorq.p_nombre());
             statement.setString(4, presupuestorq.p_descripcion());
-            statement.setInt(5, presupuestorq.p_anio_inicio());
-            statement.setInt(6, presupuestorq.p_mes_inicio());
-            statement.setInt(7, presupuestorq.p_anio_final());
-            statement.setInt(8, presupuestorq.p_mes_final());
+            setNullableInt(statement, 5, presupuestorq.p_anio_inicio());
+            setNullableInt(statement, 6, presupuestorq.p_mes_inicio());
+            setNullableInt(statement, 7, presupuestorq.p_anio_final());
+            setNullableInt(statement, 8, presupuestorq.p_mes_final());
             statement.setBigDecimal(9, presupuestorq.p_total_ingresos());
             statement.setBigDecimal(10, presupuestorq.p_total_gastos());
             statement.setBigDecimal(11, presupuestorq.p_total_ahorro());
@@ -162,6 +163,14 @@ public class PresupuestoRepository {
         return presupuestos;
     }
 
+
+    private void setNullableInt(CallableStatement statement, int index, Integer value) throws SQLException {
+        if (value == null) {
+            statement.setNull(index, Types.INTEGER);
+        } else {
+            statement.setInt(index, value);
+        }
+    }
 
     private Presupuesto mapearPresupuesto(ResultSet result) throws SQLException {
         return new Presupuesto(

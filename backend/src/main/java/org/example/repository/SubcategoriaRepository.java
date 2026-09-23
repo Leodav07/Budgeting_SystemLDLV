@@ -10,6 +10,7 @@ import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +50,11 @@ public class SubcategoriaRepository {
             statement.setInt(1, id);
             statement.setString(2, subcategoriarq.p_nombre());
             statement.setString(3, subcategoriarq.p_descripcion());
-            statement.setBoolean(4, subcategoriarq.p_estado());
+            if (subcategoriarq.p_estado() == null) {
+                statement.setNull(4, Types.BOOLEAN);
+            } else {
+                statement.setBoolean(4, subcategoriarq.p_estado());
+            }
             statement.setString(5, subcategoriarq.p_modificado_por());
             statement.execute();
 

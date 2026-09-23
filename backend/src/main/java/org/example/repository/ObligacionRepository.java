@@ -25,7 +25,7 @@ public class ObligacionRepository {
             statement.setString(3, obligacionrq.p_nombre());
             statement.setString(4, obligacionrq.p_descripcion());
             statement.setBigDecimal(5, obligacionrq.p_monto_fijo());
-            statement.setInt(6, obligacionrq.p_vence_dia());
+            setNullableInt(statement, 6, obligacionrq.p_vence_dia());
             statement.setDate(7, obligacionrq.p_fecha_inicio());
             statement.setDate(8, obligacionrq.p_fecha_final());
             statement.setString(9, obligacionrq.p_creado_por());
@@ -64,7 +64,7 @@ public class ObligacionRepository {
             statement.setString(3, obligacionrq.p_nombre());
             statement.setString(4, obligacionrq.p_descripcion());
             statement.setBigDecimal(5, obligacionrq.p_monto_fijo());
-            statement.setInt(6, obligacionrq.p_vence_dia());
+            setNullableInt(statement, 6, obligacionrq.p_vence_dia());
             statement.setDate(7, obligacionrq.p_fecha_inicio());
             statement.setDate(8, obligacionrq.p_fecha_final());
             statement.setString(9, obligacionrq.p_modificado_por());
@@ -168,6 +168,14 @@ public class ObligacionRepository {
         return obligacionesUsuarios;
     }
 
+
+    private void setNullableInt(CallableStatement statement, int index, Integer value) throws SQLException {
+        if (value == null) {
+            statement.setNull(index, Types.INTEGER);
+        } else {
+            statement.setInt(index, value);
+        }
+    }
 
     private ObligacionSubcategoria mapearObligacionSubcategoria(ResultSet result) throws SQLException {
         return new ObligacionSubcategoria(

@@ -26,7 +26,7 @@ public class CategoriaRepository {
             statement.setString(5, categoriarq.p_color_hex());
 
             if(categoriarq.p_orden() == null){
-                statement.setNull(6, Types.VARCHAR);
+                statement.setNull(6, Types.INTEGER);
             }else {
                 statement.setInt(6, categoriarq.p_orden());
             }
